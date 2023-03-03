@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+    ms_file_converter:
+        container_name: ms_file_converter
+        build:
+            context: ./
+            dockerfile: Dockerfile_local
+        env_file:
+            - ./env/local.env
+        ports:
+            - 127.0.0.1:9980:9980
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./:/home/root/
+            - ms_cronjob_volume:/home/root/certificate/
+volumes:
+    ms_cronjob_volume:

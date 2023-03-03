@@ -1,0 +1,44 @@
+{
+    "name": "ms_file_converter",
+    "version": "1.0.0",
+    "description": "Microservice file converter in PDF",
+    "author": "cimo",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cimo/Ms_file_converter"
+    },
+    "main": "./src/Controller/Server.ts",
+    "scripts": {
+        "preinstall": "npm install --package-lock-only --ignore-scripts --no-audit && npx npm-force-resolutions@0.0.3",
+        "check": "eslint . --ext .ts --fix",
+        "execute": "nodemon -L",
+        "build": "tsc --build -clean && tsc --build"
+    },
+    "dependencies": {
+        "express": "4.18.2",
+        "body-parser": "1.20.2",
+        "cookie-parser": "1.4.6",
+        "multer": "1.4.5-lts.1",
+        "cors": "2.8.5",
+        "node-cmd": "5.0.0"
+    },
+    "devDependencies": {
+        "typescript": "4.9.4",
+        "nodemon": "2.0.21",
+        "eslint": "8.35.0",
+        "@typescript-eslint/parser": "5.54.0",
+        "@typescript-eslint/eslint-plugin": "5.54.0",
+        "@types/express": "4.17.17",
+        "@types/body-parser": "1.19.2",
+        "@types/cookie-parser": "1.4.3",
+        "@types/multer": "1.4.7",
+        "@types/cors": "2.8.13",
+        "@types/csurf": "1.11.2",
+        "@types/node": "18.14.4"
+    },
+    "resolutions": {
+        "node-fetch": "2.6.7",
+        "**/node-fetch": "2.6.7"
+    }
+}
