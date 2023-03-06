@@ -1,8 +1,10 @@
 # Ms_cronjob
 
-This depend from Ms_cronjob (use the volume "ms_cronjob_volume" for the certificate).
+Docker container.
 
-- Setup
+Depend from Ms_cronjob (use the volume "ms_cronjob-volume" for share the certificate).
+
+## Setup
 
 1. Wrinte on terminal:
 ```
