@@ -1,13 +1,11 @@
-import Express, { RequestHandler } from "express";
+import Express from "express";
 import * as Fs from "fs";
 import * as Https from "https";
-import BodyParser from "body-parser";
 import CookieParser from "cookie-parser";
 import Cors from "cors";
 
 // Source
 import * as ControllerHelper from "../Controller/Helper";
-import * as ControllerUpload from "../Controller/Upload";
 import * as ControllerConverter from "../Controller/Converter";
 import * as ModelServer from "../Model/Server";
 
@@ -19,11 +17,9 @@ const corsOption: ModelServer.Cors = {
 };
 
 const app = Express();
-app.use(Express.static(__dirname + process.env.PATH_STATIC));
-
-const jsonParser = BodyParser.json() as RequestHandler;
-const urlencodedParser = BodyParser.urlencoded({ extended: false }) as RequestHandler;
-
+app.use(Express.json());
+app.use(Express.urlencoded({ extended: true }));
+app.use(Express.static(ControllerHelper.PATH_STATIC));
 app.use(CookieParser());
 app.use(
     Cors({
@@ -35,19 +31,20 @@ app.use(
 
 const server = Https.createServer(
     {
-        key: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_KEY as string),
-        cert: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_CRT as string)
+        key: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_KEY ),
+        cert: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_CRT )
     },
     app
 );
 
 server.listen(ControllerHelper.SERVER_PORT, () => {
-    ControllerHelper.writeLog("ServerHttp.listen", `Listen on port ${ControllerHelper.SERVER_PORT}`);
+    const serverTime = ControllerHelper.serverTime();
 
-    app.get("/", (req, resp) => {
-        resp.send("ms file converter");
+    ControllerHelper.writeLog("ServerHttp.listen", `Listen on port ${ControllerHelper.SERVER_PORT || ""} - Server time: ${serverTime}`);
+
+    app.get("/", (request, response) => {
+        response.status(200).send("ms_file_converter");
     });
 
-    const multer = ControllerUpload.execute();
-    ControllerConverter.execute(app, multer);
+    ControllerConverter.execute(app);
 });

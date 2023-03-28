@@ -1,15 +1,14 @@
 import Fs from "fs";
-import Express from "express";
 
 // Source
 import * as ModelHelper from "../Model/Helper";
 
-export const checkEnv = (key: string, value: string | undefined): string | undefined => {
+export const checkEnv = (key: string, value: string | undefined): string => {
     if (value === undefined) {
         console.log("Helper.ts => checkEnv", `error: ${key} is not defined!`);
     }
 
-    return value;
+    return value as string;
 };
 
 export const ENV_NAME = checkEnv("ENV_NAME", process.env.ENV_NAME);
@@ -20,21 +19,12 @@ export const SERVER_PORT = checkEnv("MS_FC_SERVER_PORT", process.env.MS_FC_SERVE
 export const MIME_TYPE = checkEnv("MS_FC_MIME_TYPE", process.env.MS_FC_MIME_TYPE);
 export const FILE_SIZE = checkEnv("MS_FC_FILE_SIZE", process.env.MS_FC_FILE_SIZE);
 export const TOKEN = checkEnv("MS_FC_TOKEN", process.env.MS_FC_TOKEN);
-
-export const PATH_STATIC = "./static/";
-export const PATH_LOG = "./log/";
-export const PATH_FILE_INPUT = "./file/input/";
-export const PATH_FILE_OUTPUT = "./file/output/";
-export const PATH_CERTIFICATE_FILE_KEY = "/home/root/certificate/tls.key";
-export const PATH_CERTIFICATE_FILE_CRT = "/home/root/certificate/tls.crt";
-
-export const writeLog = <T>(tag: string, value: T): void => {
-    if (DEBUG === "true") {
-        Fs.appendFile(`${PATH_LOG}debug.log`, `${tag}: ${value}\n`, () => {
-            console.log(`WriteLog => ${tag}: `, value);
-        });
-    }
-};
+export const PATH_STATIC = checkEnv("MS_FC_PATH_STATIC", process.env.MS_FC_PATH_STATIC);
+export const PATH_LOG = checkEnv("MS_FC_PATH_LOG", process.env.MS_FC_PATH_LOG);
+export const PATH_FILE_INPUT = checkEnv("MS_FC_PATH_FILE_INPUT", process.env.MS_FC_PATH_FILE_INPUT);
+export const PATH_FILE_OUTPUT = checkEnv("MS_FC_PATH_FILE_OUTPUT", process.env.MS_FC_PATH_FILE_OUTPUT);
+export const PATH_CERTIFICATE_FILE_KEY = checkEnv("MS_FC_PATH_CERTIFICATE_FILE_KEY", process.env.MS_FC_PATH_CERTIFICATE_FILE_KEY);
+export const PATH_CERTIFICATE_FILE_CRT = checkEnv("MS_FC_PATH_CERTIFICATE_FILE_CRT", process.env.MS_FC_PATH_CERTIFICATE_FILE_CRT);
 
 const circularReplacer = (): ModelHelper.circularReplacer => {
     const seen = new WeakSet();
@@ -56,6 +46,14 @@ export const objectOutput = (obj: unknown): string => {
     return JSON.stringify(obj, circularReplacer(), 2);
 };
 
+export const writeLog = (tag: string, value: string): void => {
+    if (DEBUG === "true" && PATH_LOG) {
+        Fs.appendFile(`${PATH_LOG}debug.log`, `${tag}: ${value}\n`, () => {
+            console.log(`WriteLog => ${tag}: `, value);
+        });
+    }
+};
+
 export const serverTime = (): string => {
     const currentDate = new Date();
 
@@ -75,11 +73,40 @@ export const serverTime = (): string => {
 
     const time = `${currentDate.getHours()}:${minuteOut}:${secondOut}`;
 
-    return `${date} ${time}`;
+    const result = `${date} ${time}`;
+
+    writeLog("Helper.ts => serverTime", result);
+
+    return result;
 };
 
-export const fileReadStream = async (filePath: string): Promise<Buffer> => {
+export const fileWriteStream = (filePath: string, buffer: Buffer): Promise<void> => {
     return new Promise((resolve, reject) => {
+        writeLog("Helper.ts => fileWriteStream", `filePath: ${filePath}`);
+
+        const writeStream = Fs.createWriteStream(filePath);
+
+        writeStream.on("open", () => {
+            writeStream.write(buffer);
+            writeStream.end();
+        });
+
+        writeStream.on("finish", () => {
+            resolve();
+        });
+
+        writeStream.on("error", (error: Error) => {
+            writeLog("Helper.ts => fileWriteStream", `writeStream.on("error": ${objectOutput(error)}`);
+
+            reject();
+        });
+    });
+};
+
+export const fileReadStream = (filePath: string): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        writeLog("Helper.ts => fileReadStream", `filePath: ${filePath}`);
+
         const chunkList: Buffer[] = [];
 
         const readStream = Fs.createReadStream(filePath);
@@ -88,70 +115,26 @@ export const fileReadStream = async (filePath: string): Promise<Buffer> => {
             chunkList.push(chunk);
         });
 
-        readStream.on("end", () => {
-            const buffer = Buffer.concat(chunkList);
+        readStream.on("finish", () => {
+            const result = Buffer.concat(chunkList);
 
-            resolve(buffer);
+            resolve(result);
         });
 
-        readStream.on("error", reject);
+        readStream.on("error", (error: Error) => {
+            writeLog("Helper.ts => fileReadStream", `readStream.on("error": ${objectOutput(error)}`);
+
+            reject();
+        });
     });
 };
 
 export const fileRemove = (path: string): void => {
+    writeLog("Helper.ts => fileRemove", `path: ${path}`);
+
     Fs.unlink(path, (error: NodeJS.ErrnoException | null) => {
         if (error) {
-            writeLog("Helper.ts => fileRemove", `unlink - error: ${error}`);
+            writeLog("Helper.ts => fileRemove", `Fs.unlink - error: ${objectOutput(error)}`);
         }
     });
-};
-
-export const checkRequest = async (req: Express.Request, file?: globalThis.Express.Multer.File): Promise<boolean> => {
-    let result = false;
-
-    // Token
-    let tokenWrong = "";
-
-    const token = req.body.token_api && TOKEN && req.body.token_api === TOKEN ? true : false;
-
-    if (!token) {
-        tokenWrong = "token_api";
-    }
-
-    // Parameter
-    let parameterNotFound = "";
-
-    if (file) {
-        if (!req.body.file_name) {
-            parameterNotFound = "file_name";
-        } else if (!file) {
-            parameterNotFound = "file";
-        }
-    }
-
-    // Mime type
-    let mimeTypeWrong = "";
-
-    if (file) {
-        const mimeTypeInclude = MIME_TYPE ? MIME_TYPE.includes(file.mimetype) : false;
-
-        if (!mimeTypeInclude) {
-            mimeTypeWrong = file.mimetype;
-        }
-    }
-
-    // Populate request body
-    req.body.checkRequest = {};
-    req.body.checkRequest["tokenWrong"] = tokenWrong;
-    req.body.checkRequest["parameterNotFound"] = parameterNotFound;
-    req.body.checkRequest["mimeTypeWrong"] = mimeTypeWrong;
-
-    // Result
-    if (tokenWrong === "" && parameterNotFound === "" && mimeTypeWrong === "") {
-        result = true;
-    }
-
-    writeLog("Helper.ts => checkRequest", `result: ${result}`);
-
-    return result;
 };

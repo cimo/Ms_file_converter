@@ -1,7 +1,6 @@
 {
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     "eslint.format.enable": true,
-    "eslint.workingDirectories": ["./src"],
     "docker.commands.attach": "${containerCommand} exec -it ${containerId} bash",
     "[dockercompose]": {
         "editor.defaultFormatter": "ms-azuretools.vscode-docker"
@@ -15,17 +14,10 @@
     "[typescript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
     "[javascript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
     "[scss]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
-    "python.formatting.provider": "autopep8",
-    "[python]": {
-        "editor.formatOnType": true
     }
 }

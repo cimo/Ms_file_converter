@@ -1,5 +1,5 @@
 {
     "watch": ["src"],
     "ext": "ts",
-    "exec": "tsc && node ./dist/Controller/Server.js"
+    "exec": "tsc && node --require dotenv/config ./dist/Controller/Server.js"
 }

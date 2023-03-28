@@ -1,60 +1,130 @@
-import Cmd from "node-cmd";
 import Express from "express";
-import Multer from "multer";
+import Path from "path";
+import { exec } from "child_process";
 
 // Source
 import * as ControllerHelper from "../Controller/Helper";
-import * as ModelError from "../Model/Error";
+import * as ControllerUpload from "../Controller/Upload";
+import * as ModelHelper from "../Model/Helper";
 
-export const responseFile = async (output: string, res: Express.Response): Promise<void> => {
-    await ControllerHelper.fileReadStream(output)
-        .then((buffer) => {
-            ControllerHelper.writeLog("Upload.ts => /msfileconverter/pdf", `fileReadStream - then: Converted.`);
+export const responseFile = (filePath: string, response: Express.Response): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        void (async () => {
+            await ControllerHelper.fileReadStream(filePath).then((buffer) => {
+                response.send(buffer.toString("base64"));
 
-            res.send(buffer.toString("base64"));
-        })
-        .catch((response) => {
-            ControllerHelper.writeLog("Upload.ts => /msfileconverter/pdf", `fileReadStream - catch: ${response}`);
-        });
+                resolve();
+            }).catch((error: Error) =>{
+                console.log(`Converter.ts - ControllerHelper.fileReadStream - catch error: ${ControllerHelper.objectOutput(error)}`);
+
+                reject();
+            });
+        })();
+    });
 };
 
-export const execute = (app: Express.Express, multer: Multer.Multer): void => {
-    app.post("/msfileconverter/pdf", multer.single("file"), async (req: Express.Request, res: Express.Response) => {
-        ControllerHelper.writeLog("Upload.ts => /msfileconverter/pdf", `req.body: ${ControllerHelper.objectOutput(req.body)} / req.file: ${ControllerHelper.objectOutput(req.file)}`);
+export const execute = (app: Express.Express): void => {
+    app.post("/msfileconverter/pdf", (request: Express.Request, response: Express.Response) => {
+        void (async () => {
+            await ControllerUpload.execute(request).then((result) => {
+                const input = result.input;
+                const output = result.output;
 
-        if (req.file && req.body.checkRequest && req.body.checkRequest.tokenWrong === "" && req.body.checkRequest.parameterNotFound === "" && req.body.checkRequest.mimeTypeWrong === "") {
-            const input = `./${req.file.path}`;
-            const output = `${ControllerHelper.PATH_FILE_OUTPUT}${req.body.file_name.split(".")[0]}.pdf`;
+                exec(`soffice --headless --convert-to pdf "${Path.dirname(input)}" --outdir "${ControllerHelper.PATH_FILE_OUTPUT}"`, (error, stdout, stderr) => {
+                    void (async () => {
+                        console.log(`Converter.ts - ControllerUpload.execute - stdout: ${stdout}`);
+                        console.log(`Converter.ts - ControllerUpload.execute - stderr: ${stderr}`);
 
-            if (req.file.mimetype !== "application/pdf") {
-                Cmd.run(`soffice --headless --convert-to pdf ${input} --outdir ${ControllerHelper.PATH_FILE_OUTPUT}`, async (cmdError: ModelError.CmdError) => {
-                    if (cmdError) {
-                        ControllerHelper.writeLog("Upload.ts => /msfileconverter/pdf", `Cmd.run(soffice ... - cmdError: ${cmdError}`);
+                        if (error) {
+                            //ControllerHelper.fileRemove(input);
+                            //ControllerHelper.fileRemove(output);
 
-                        ControllerHelper.fileRemove(input);
-                        ControllerHelper.fileRemove(output);
+                            response.status(500).send({ Error: "Conversion failed." });
+                        } else {
+                            await responseFile(result.output, response).then(() => {
+                                //ControllerHelper.fileRemove(input);
+                                //ControllerHelper.fileRemove(output);
 
-                        res.status(500).send({ Error: "Conversion fail!" });
-                    } else {
-                        await responseFile(output, res).then(() => {
+                                response.status(200).send({ Error: "Conversion succeeded." });
+                            }).catch((error: Error) =>{
+                                console.log(`Converter.ts - responseFile - catch error: ${ControllerHelper.objectOutput(error)}`);
+                            });
+                        }
+                    })();
+                });
+            }).catch((error: Error) =>{
+                console.log(`Converter.ts - ControllerUpload.execute - catch error: ${ControllerHelper.objectOutput(error)}`);
+
+                response.status(500).send({ Error: "Upload failed." });
+            });
+        })();
+    });
+
+    //const test = multer.single("file");
+    //app.post("/msfileconverter/pdf", test, (req: Express.Request, res: Express.Response) => {
+        /*
+        //ControllerHelper.writeLog("Converter.ts => app.post('/msfileconverter/pdf'", `req.body: ${ControllerHelper.objectOutput(req.body)} / req.file: ${ControllerHelper.objectOutput(req.file)}`);
+
+        //console.log("cimo1");
+
+        const requestBody = req.body as ModelHelper.requestBody;
+        const checkRequest = requestBody.checkRequest;
+
+        if (req.file) {
+            //console.log("cimo2");
+
+            const input = req.file.path;
+            const output = `${ControllerHelper.PATH_FILE_OUTPUT}${requestBody.file_name.split(".")[0]}.pdf`;
+
+            if (checkRequest.tokenWrong === "" && checkRequest.parameterNotFound === "" && checkRequest.mimeTypeWrong === "") {
+                //console.log("cimo3");
+
+                if (req.file.mimetype !== "application/pdf") {
+                    //console.log("cimo4a");
+
+                    exec(`soffice --headless --convert-to pdf "${input}" --outdir "${ControllerHelper.PATH_FILE_OUTPUT}"`, (error, stdout, stderr) => {
+                        //console.log("cimo5");
+
+                        //console.log(stdout);
+                        //console.log(stderr);
+
+                        if (error) {
+                            //console.log("cimo6a");
+
                             ControllerHelper.fileRemove(input);
                             ControllerHelper.fileRemove(output);
-                        });
-                    }
-                });
-            } else {
-                await responseFile(input, res).then(() => {
-                    ControllerHelper.fileRemove(input);
-                });
+
+                            res.status(500).send({ Error: "Conversion failed." });
+                        } else {
+                            //console.log("cimo6b");
+
+                            responseFile(output, res, () => {
+                                console.log("cimo7");
+
+                                ControllerHelper.fileRemove(input);
+                                ControllerHelper.fileRemove(output);
+                            });
+                        }
+                    });
+                } else {
+                    //console.log("cimo4b");
+
+                    responseFile(input, res, () => {
+                        //console.log("cimo4c");
+
+                        ControllerHelper.fileRemove(input);
+                    });
+                }
+            } else if (checkRequest.tokenWrong !== "") {
+                res.status(500).send({ Error: `Token wrong: ${checkRequest.tokenWrong}` });
+            } else if (checkRequest.parameterNotFound !== "") {
+                res.status(500).send({ Error: `Parameter not found: ${checkRequest.parameterNotFound}` });
+            } else if (checkRequest.mimeTypeWrong !== "") {
+                res.status(500).send({ Error: `Mime type wrong: ${checkRequest.mimeTypeWrong}` });
             }
-        } else if (req.body.checkRequest && req.body.checkRequest.tokenWrong !== "") {
-            res.status(500).send({ Error: `Token wrong: ${req.body.checkRequest.tokenWrong}` });
-        } else if (req.body.checkRequest && req.body.checkRequest.parameterNotFound !== "") {
-            res.status(500).send({ Error: `Parameter not found: ${req.body.checkRequest.parameterNotFound}` });
-        } else if (req.body.checkRequest && req.body.checkRequest.mimeTypeWrong !== "") {
-            res.status(500).send({ Error: `Mime type worng: ${req.body.checkRequest.mimeTypeWrong}` });
         } else {
             res.status(500).send({ Error: "File not found." });
         }
-    });
+        */
+    //});
 };
