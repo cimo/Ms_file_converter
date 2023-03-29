@@ -5,7 +5,7 @@ import * as ModelHelper from "../Model/Helper";
 
 export const checkEnv = (key: string, value: string | undefined): string => {
     if (value === undefined) {
-        console.log("Helper.ts => checkEnv", `error: ${key} is not defined!`);
+        writeLog("Helper.ts - checkEnv - error:", `${key} is not defined!`);
     }
 
     return value as string;
@@ -82,8 +82,6 @@ export const serverTime = (): string => {
 
 export const fileWriteStream = (filePath: string, buffer: Buffer): Promise<void> => {
     return new Promise((resolve, reject) => {
-        writeLog("Helper.ts => fileWriteStream", `filePath: ${filePath}`);
-
         const writeStream = Fs.createWriteStream(filePath);
 
         writeStream.on("open", () => {
@@ -96,17 +94,13 @@ export const fileWriteStream = (filePath: string, buffer: Buffer): Promise<void>
         });
 
         writeStream.on("error", (error: Error) => {
-            writeLog("Helper.ts => fileWriteStream", `writeStream.on("error": ${objectOutput(error)}`);
-
-            reject();
+            reject(error);
         });
     });
 };
 
 export const fileReadStream = (filePath: string): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
-        writeLog("Helper.ts => fileReadStream", `filePath: ${filePath}`);
-
         const chunkList: Buffer[] = [];
 
         const readStream = Fs.createReadStream(filePath);
@@ -115,16 +109,14 @@ export const fileReadStream = (filePath: string): Promise<Buffer> => {
             chunkList.push(chunk);
         });
 
-        readStream.on("finish", () => {
+        readStream.on("end", () => {
             const result = Buffer.concat(chunkList);
 
             resolve(result);
         });
 
         readStream.on("error", (error: Error) => {
-            writeLog("Helper.ts => fileReadStream", `readStream.on("error": ${objectOutput(error)}`);
-
-            reject();
+            reject(error);
         });
     });
 };

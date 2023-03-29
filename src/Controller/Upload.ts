@@ -1,5 +1,5 @@
 import Express from "express";
-import * as FormDataParser from "form-data_parser/dist/";
+import * as FormDataParser from "@cimo/form-data_parser";
 
 // Source
 import * as ControllerHelper from "../Controller/Helper";
@@ -40,7 +40,7 @@ const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
         parameterNotFound = "file";
     }
 
-    ControllerHelper.writeLog("Helper.ts => checkRequest", `${tokenWrong.toString()} - ${fileWrong.toString()} - ${parameterNotFound}`);
+    ControllerHelper.writeLog("Upload.ts - checkRequest", `tokenWrong: ${tokenWrong.toString()} - fileWrong: ${fileWrong.toString()} - parameterNotFound: ${parameterNotFound}`);
 
     // Result
     const result = tokenWrong === false && fileWrong === false && parameterNotFound === "" ? true : false;
@@ -69,19 +69,25 @@ export const execute = (request: Express.Request): Promise<Record<string, string
                             const input = `${ControllerHelper.PATH_FILE_INPUT}${value.filename}`;
                             const output = `${ControllerHelper.PATH_FILE_OUTPUT}${value.filename.split(".")[0]}.pdf`;
 
-                            await ControllerHelper.fileWriteStream(input, value.buffer).then(() => {
-                                resolve({input, output});
-                            }).catch((error: Error) =>{
-                                console.log(`Upload.ts - ControllerHelper.fileWriteStream - catch error: ${ControllerHelper.objectOutput(error)}`);
-                            });
+                            await ControllerHelper.fileWriteStream(input, value.buffer)
+                                .then(() => {
+                                    resolve({ input, output });
+                                })
+                                .catch((error: Error) => {
+                                    ControllerHelper.writeLog("Upload.ts - ControllerHelper.fileWriteStream - catch error", ControllerHelper.objectOutput(error));
+                                });
 
                             break;
                         }
                     }
                 } else {
-                    reject(false);
+                    reject();
                 }
             })();
+        });
+
+        request.on("error", (error: Error) => {
+            reject(error);
         });
     });
 };

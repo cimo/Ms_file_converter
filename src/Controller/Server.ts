@@ -31,8 +31,8 @@ app.use(
 
 const server = Https.createServer(
     {
-        key: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_KEY ),
-        cert: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_CRT )
+        key: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_KEY),
+        cert: Fs.readFileSync(ControllerHelper.PATH_CERTIFICATE_FILE_CRT)
     },
     app
 );
@@ -40,7 +40,7 @@ const server = Https.createServer(
 server.listen(ControllerHelper.SERVER_PORT, () => {
     const serverTime = ControllerHelper.serverTime();
 
-    ControllerHelper.writeLog("ServerHttp.listen", `Listen on port ${ControllerHelper.SERVER_PORT || ""} - Server time: ${serverTime}`);
+    ControllerHelper.writeLog("Server.ts - server.listen", `Port ${ControllerHelper.SERVER_PORT || ""} - Time: ${serverTime}`);
 
     app.get("/", (request, response) => {
         response.status(200).send("ms_file_converter");
