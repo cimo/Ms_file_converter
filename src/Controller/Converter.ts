@@ -6,6 +6,28 @@ import { exec } from "child_process";
 import * as ControllerHelper from "../Controller/Helper";
 import * as ControllerUpload from "../Controller/Upload";
 
+const removeFile = (input: string | undefined, output: string | undefined) => {
+    if (input) {
+        ControllerHelper.fileRemove(input)
+            .then(() => {
+                ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileRemove - input", input);
+            })
+            .catch((error: Error) => {
+                ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileRemove - error", ControllerHelper.objectOutput(error));
+            });
+    }
+
+    if (output) {
+        ControllerHelper.fileRemove(output)
+            .then(() => {
+                ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileRemove - output", output);
+            })
+            .catch((error: Error) => {
+                ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileRemove - error", ControllerHelper.objectOutput(error));
+            });
+    }
+};
+
 export const execute = (app: Express.Express): void => {
     app.post("/msfileconverter/pdf", (request: Express.Request, response: Express.Response) => {
         void (async () => {
@@ -23,22 +45,19 @@ export const execute = (app: Express.Express): void => {
 
                                         response.status(200).send(buffer.toString("base64"));
 
-                                        ControllerHelper.fileRemove(input);
-                                        ControllerHelper.fileRemove(output);
+                                        removeFile(input, output);
                                     })
                                     .catch((error: Error) => {
                                         ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileReadStream - catch error", ControllerHelper.objectOutput(error));
 
-                                        ControllerHelper.fileRemove(input);
-                                        ControllerHelper.fileRemove(output);
+                                        removeFile(input, output);
 
                                         response.status(500).send({ Error: stderr });
                                     });
                             } else if (stdout === "" && stderr !== "") {
                                 ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
 
-                                ControllerHelper.fileRemove(input);
-                                ControllerHelper.fileRemove(output);
+                                removeFile(input, output);
 
                                 response.status(500).send({ Error: stderr });
                             }

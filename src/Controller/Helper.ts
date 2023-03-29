@@ -75,8 +75,6 @@ export const serverTime = (): string => {
 
     const result = `${date} ${time}`;
 
-    writeLog("Helper.ts => serverTime", result);
-
     return result;
 };
 
@@ -121,13 +119,15 @@ export const fileReadStream = (filePath: string): Promise<Buffer> => {
     });
 };
 
-export const fileRemove = (path: string): void => {
-    writeLog("Helper.ts => fileRemove", `path: ${path}`);
-
-    Fs.unlink(path, (error: NodeJS.ErrnoException | null) => {
-        if (error) {
-            writeLog("Helper.ts => fileRemove", `Fs.unlink - error: ${objectOutput(error)}`);
-        }
+export const fileRemove = (path: string): Promise<NodeJS.ErrnoException | boolean> => {
+    return new Promise((resolve, reject) => {
+        Fs.unlink(path, (error: NodeJS.ErrnoException | null) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(true);
+            }
+        });
     });
 };
 
