@@ -16,12 +16,11 @@ export const execute = (app: Express.Express): void => {
 
                     exec(`soffice --headless --convert-to pdf "${input}" --outdir "${Path.dirname(output)}"`, (error, stdout, stderr) => {
                         void (async () => {
-                            ControllerHelper.writeLog("Converter.ts - exec('soffice... - stdout", stdout);
-                            ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
-
                             if (stdout !== "" && stderr === "") {
                                 await ControllerHelper.fileReadStream(result.output)
                                     .then((buffer) => {
+                                        ControllerHelper.writeLog("Converter.ts - exec('soffice... - stdout", stdout);
+
                                         response.status(200).send(buffer.toString("base64"));
 
                                         ControllerHelper.fileRemove(input);
@@ -33,13 +32,15 @@ export const execute = (app: Express.Express): void => {
                                         ControllerHelper.fileRemove(input);
                                         ControllerHelper.fileRemove(output);
 
-                                        response.status(500).send({ Error: "Conversion failed." });
+                                        response.status(500).send({ Error: stderr });
                                     });
                             } else if (stdout === "" && stderr !== "") {
+                                ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
+
                                 ControllerHelper.fileRemove(input);
                                 ControllerHelper.fileRemove(output);
 
-                                response.status(500).send({ Error: "Conversion failed." });
+                                response.status(500).send({ Error: stderr });
                             }
                         })();
                     });

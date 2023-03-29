@@ -1,7 +1,7 @@
 {
     "name": "ms_file_converter",
     "version": "1.0.0",
-    "description": "Microservice file converter in PDF",
+    "description": "Microservice file converter in PDF.",
     "author": "cimo",
     "license": "MIT",
     "repository": {

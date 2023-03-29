@@ -7,7 +7,7 @@ module.exports = {
     ],
     parser: "@typescript-eslint/parser",
     plugins: ["@typescript-eslint", "prettier"],
-    ignorePatterns: ["**/*.js", "dist", "node_modules"],
+    ignorePatterns: ["**/*.js", "dist", "node_modules", "public"],
     root: true,
     parserOptions: {
         project: true,

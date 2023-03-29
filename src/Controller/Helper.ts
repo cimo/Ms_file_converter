@@ -130,3 +130,11 @@ export const fileRemove = (path: string): void => {
         }
     });
 };
+
+export const checkToken = (value: string): boolean => {
+    if (TOKEN && TOKEN === value) {
+        return true;
+    }
+
+    return false;
+};
