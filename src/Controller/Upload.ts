@@ -7,21 +7,23 @@ import * as ControllerHelper from "../Controller/Helper";
 const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
     const parameterList: string[] = [];
     let tokenWrong = false;
-    let fileWrong = false;
+    let fileWrong = "";
     let parameterNotFound = "";
 
     for (const value of formDataList) {
         if (value.name === "token_api") {
-            if (ControllerHelper.TOKEN && ControllerHelper.TOKEN !== value.buffer.toString()) {
+            if (!ControllerHelper.checkToken(value.buffer.toString())) {
                 tokenWrong = true;
             }
         }
 
         if (value.name === "file") {
-            if (value.filename === "" && value.mimeType === "") {
-                fileWrong = true;
-            } else if (ControllerHelper.MIME_TYPE && !ControllerHelper.MIME_TYPE.includes(value.mimeType)) {
-                fileWrong = true;
+            if (value.filename === "" || value.mimeType === "" || value.size === "") {
+                fileWrong = "empty";
+            } else if (!ControllerHelper.checkMymeType(value.mimeType)) {
+                fileWrong = "mimeType";
+            } else if (!ControllerHelper.checkFileSize(value.size)) {
+                fileWrong = "size";
             }
         }
 
@@ -43,7 +45,7 @@ const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
     ControllerHelper.writeLog("Upload.ts - checkRequest", `tokenWrong: ${tokenWrong.toString()} - fileWrong: ${fileWrong.toString()} - parameterNotFound: ${parameterNotFound}`);
 
     // Result
-    const result = tokenWrong === false && fileWrong === false && parameterNotFound === "" ? true : false;
+    const result = tokenWrong === false && fileWrong === "" && parameterNotFound === "" ? true : false;
 
     return result;
 };

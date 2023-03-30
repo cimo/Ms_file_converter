@@ -17,7 +17,7 @@ export const DEBUG = checkEnv("MS_FC_DEBUG", process.env.MS_FC_DEBUG);
 export const CORS_ORIGIN_URL = checkEnv("MS_FC_CORS_ORIGIN_URL", process.env.MS_FC_CORS_ORIGIN_URL);
 export const SERVER_PORT = checkEnv("MS_FC_SERVER_PORT", process.env.MS_FC_SERVER_PORT);
 export const MIME_TYPE = checkEnv("MS_FC_MIME_TYPE", process.env.MS_FC_MIME_TYPE);
-export const FILE_SIZE = checkEnv("MS_FC_FILE_SIZE", process.env.MS_FC_FILE_SIZE);
+export const FILE_SIZE_MB = checkEnv("MS_FC_FILE_SIZE_MB", process.env.MS_FC_FILE_SIZE_MB);
 export const TOKEN = checkEnv("MS_FC_TOKEN", process.env.MS_FC_TOKEN);
 export const PATH_STATIC = checkEnv("MS_FC_PATH_STATIC", process.env.MS_FC_PATH_STATIC);
 export const PATH_LOG = checkEnv("MS_FC_PATH_LOG", process.env.MS_FC_PATH_LOG);
@@ -133,6 +133,24 @@ export const fileRemove = (path: string): Promise<NodeJS.ErrnoException | boolea
 
 export const checkToken = (value: string): boolean => {
     if (TOKEN && TOKEN === value) {
+        return true;
+    }
+
+    return false;
+};
+
+export const checkMymeType = (value: string): boolean => {
+    if (MIME_TYPE && MIME_TYPE.includes(value)) {
+        return true;
+    }
+
+    return false;
+};
+
+export const checkFileSize = (value: string): boolean => {
+    const fileSizeMb = parseInt(FILE_SIZE_MB ? FILE_SIZE_MB : "0") * 1024 * 1024;
+
+    if (fileSizeMb >= parseInt(value)) {
         return true;
     }
 
