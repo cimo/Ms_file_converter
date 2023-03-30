@@ -5,7 +5,7 @@ import * as ModelHelper from "../Model/Helper";
 
 export const checkEnv = (key: string, value: string | undefined): string => {
     if (value === undefined) {
-        writeLog("Helper.ts - checkEnv - error:", `${key} is not defined!`);
+        console.log("Helper.ts - checkEnv - error:", `${key} is not defined!`);
     }
 
     return value as string;
