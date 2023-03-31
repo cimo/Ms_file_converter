@@ -32,4 +32,4 @@ WORKDIR /home/root/
 
 CMD npm install && npm run execute
 
-EXPOSE 1980
+EXPOSE 1000 30000

@@ -38,4 +38,4 @@ RUN npm install && npm run build
 
 CMD node /home/root/dist/Controller/Server.js
 
-EXPOSE 1980
+EXPOSE 1000
