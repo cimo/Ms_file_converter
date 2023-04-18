@@ -48,7 +48,10 @@ export const execute = (app: Express.Express): void => {
                                         removeFile(input, output);
                                     })
                                     .catch((error: Error) => {
-                                        ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileReadStream - catch error", ControllerHelper.objectOutput(error));
+                                        ControllerHelper.writeLog(
+                                            "Converter.ts - ControllerHelper.fileReadStream - catch error",
+                                            ControllerHelper.objectOutput(error)
+                                        );
 
                                         removeFile(input, output);
 

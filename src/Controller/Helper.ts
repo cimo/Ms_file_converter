@@ -5,6 +5,7 @@ import * as ModelHelper from "../Model/Helper";
 
 export const checkEnv = (key: string, value: string | undefined): string => {
     if (value === undefined) {
+        // eslint-disable-next-line no-console
         console.log("Helper.ts - checkEnv - error:", `${key} is not defined!`);
     }
 
@@ -49,6 +50,7 @@ export const objectOutput = (obj: unknown): string => {
 export const writeLog = (tag: string, value: string): void => {
     if (DEBUG === "true" && PATH_LOG) {
         Fs.appendFile(`${PATH_LOG}debug.log`, `${tag}: ${value}\n`, () => {
+            // eslint-disable-next-line no-console
             console.log(`WriteLog => ${tag}: `, value);
         });
     }
