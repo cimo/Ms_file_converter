@@ -3,12 +3,12 @@ FROM node:18.13.0
 ARG VERSION_TAG
 ARG ENV_NAME
 ARG DOMAIN
+
 ARG MS_FC_SERVER_PORT
 
 ENV VERSION_TAG=${VERSION_TAG}
 ENV ENV_NAME=${ENV_NAME}
 ENV DOMAIN=${DOMAIN}
-ENV MS_FC_SERVER_PORT=${MS_FC_SERVER_PORT}
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DEBCONF_NOWARNINGS=yes
@@ -23,9 +23,12 @@ RUN cd ~ \
     && chmod 775 /home/root/ /usr/local/lib/node_modules/ \
     # Apt
     && apt-get update && apt-get install -y \
+    ca-certificates \
     default-jre \
     libreoffice --no-install-recommends \
     fonts-noto-cjk \
+    # Certificate
+    && update-ca-certificates \
     # Clean
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean -y \
