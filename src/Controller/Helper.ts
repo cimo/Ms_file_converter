@@ -1,3 +1,4 @@
+import Express from "express";
 import Fs from "fs";
 
 // Source
@@ -14,12 +15,12 @@ export const checkEnv = (key: string, value: string | undefined): string => {
 
 export const ENV_NAME = checkEnv("ENV_NAME", process.env.ENV_NAME);
 export const DOMAIN = checkEnv("DOMAIN", process.env.DOMAIN);
+export const SERVER_PORT = checkEnv("SERVER_PORT", process.env.SERVER_PORT);
 export const DEBUG = checkEnv("MS_FC_DEBUG", process.env.MS_FC_DEBUG);
 export const CORS_ORIGIN_URL = checkEnv("MS_FC_CORS_ORIGIN_URL", process.env.MS_FC_CORS_ORIGIN_URL);
-export const SERVER_PORT = checkEnv("MS_FC_SERVER_PORT", process.env.MS_FC_SERVER_PORT);
+export const TOKEN = checkEnv("MS_FC_TOKEN", process.env.MS_FC_TOKEN);
 export const MIME_TYPE = checkEnv("MS_FC_MIME_TYPE", process.env.MS_FC_MIME_TYPE);
 export const FILE_SIZE_MB = checkEnv("MS_FC_FILE_SIZE_MB", process.env.MS_FC_FILE_SIZE_MB);
-export const TOKEN = checkEnv("MS_FC_TOKEN", process.env.MS_FC_TOKEN);
 export const PATH_STATIC = checkEnv("MS_FC_PATH_STATIC", process.env.MS_FC_PATH_STATIC);
 export const PATH_LOG = checkEnv("MS_FC_PATH_LOG", process.env.MS_FC_PATH_LOG);
 export const PATH_FILE_INPUT = checkEnv("MS_FC_PATH_FILE_INPUT", process.env.MS_FC_PATH_FILE_INPUT);
@@ -27,7 +28,7 @@ export const PATH_FILE_OUTPUT = checkEnv("MS_FC_PATH_FILE_OUTPUT", process.env.M
 export const PATH_CERTIFICATE_FILE_KEY = checkEnv("MS_FC_PATH_CERTIFICATE_FILE_KEY", process.env.MS_FC_PATH_CERTIFICATE_FILE_KEY);
 export const PATH_CERTIFICATE_FILE_CRT = checkEnv("MS_FC_PATH_CERTIFICATE_FILE_CRT", process.env.MS_FC_PATH_CERTIFICATE_FILE_CRT);
 
-const circularReplacer = (): ModelHelper.circularReplacer => {
+const circularReplacer = (): ModelHelper.IcircularReplacer => {
     const seen = new WeakSet();
 
     return (key: string, value: string): string | null => {
@@ -47,9 +48,9 @@ export const objectOutput = (obj: unknown): string => {
     return JSON.stringify(obj, circularReplacer(), 2);
 };
 
-export const writeLog = (tag: string, value: string): void => {
+export const writeLog = (tag: string, value: string | boolean): void => {
     if (DEBUG === "true" && PATH_LOG) {
-        Fs.appendFile(`${PATH_LOG}debug.log`, `${tag}: ${value}\n`, () => {
+        Fs.appendFile(`${PATH_LOG}debug.log`, `${tag}: ${value.toString()}\n`, () => {
             // eslint-disable-next-line no-console
             console.log(`WriteLog => ${tag}: `, value);
         });
@@ -157,4 +158,10 @@ export const checkFileSize = (value: string): boolean => {
     }
 
     return false;
+};
+
+export const responseBody = (stdoutValue: string, stderrValue: string | Error, response: Express.Response, mode: number) => {
+    const responseBody: ModelHelper.IresponseBody = { response: { stdout: stdoutValue, stderr: stderrValue } };
+
+    response.status(mode).send(responseBody);
 };

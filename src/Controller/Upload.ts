@@ -7,7 +7,7 @@ import * as ControllerHelper from "../Controller/Helper";
 const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
     const parameterList: string[] = [];
     let tokenWrong = false;
-    let fileWrong = "";
+    let fileProblem = "";
     let parameterNotFound = "";
 
     for (const value of formDataList) {
@@ -19,11 +19,11 @@ const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
 
         if (value.name === "file") {
             if (value.filename === "" || value.mimeType === "" || value.size === "") {
-                fileWrong = "empty";
+                fileProblem = "empty";
             } else if (!ControllerHelper.checkMymeType(value.mimeType)) {
-                fileWrong = "mimeType";
+                fileProblem = "mimeType";
             } else if (!ControllerHelper.checkFileSize(value.size)) {
-                fileWrong = "size";
+                fileProblem = "size";
             }
         }
 
@@ -44,16 +44,16 @@ const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
 
     ControllerHelper.writeLog(
         "Upload.ts - checkRequest",
-        `tokenWrong: ${tokenWrong.toString()} - fileWrong: ${fileWrong.toString()} - parameterNotFound: ${parameterNotFound}`
+        `tokenWrong: ${tokenWrong.toString()} - fileProblem: ${fileProblem.toString()} - parameterNotFound: ${parameterNotFound}`
     );
 
     // Result
-    const result = tokenWrong === false && fileWrong === "" && parameterNotFound === "" ? true : false;
+    const result = tokenWrong === false && fileProblem === "" && parameterNotFound === "" ? true : false;
 
     return result;
 };
 
-export const execute = (request: Express.Request): Promise<Record<string, string>> => {
+export const execute = (request: Express.Request): Promise<string> => {
     return new Promise((resolve, reject) => {
         const chunkList: Buffer[] = [];
 
@@ -72,15 +72,14 @@ export const execute = (request: Express.Request): Promise<Record<string, string
                     for (const value of formDataList) {
                         if (value.name === "file" && value.filename && value.buffer) {
                             const input = `${ControllerHelper.PATH_FILE_INPUT}${value.filename}`;
-                            const output = `${ControllerHelper.PATH_FILE_OUTPUT}${value.filename.split(".")[0]}.pdf`;
 
                             await ControllerHelper.fileWriteStream(input, value.buffer)
                                 .then(() => {
-                                    resolve({ input, output });
+                                    resolve(input);
                                 })
                                 .catch((error: Error) => {
                                     ControllerHelper.writeLog(
-                                        "Upload.ts - ControllerHelper.fileWriteStream - catch error",
+                                        "Upload.ts - ControllerHelper.fileWriteStream() - catch error: ",
                                         ControllerHelper.objectOutput(error)
                                     );
                                 });
@@ -89,12 +88,14 @@ export const execute = (request: Express.Request): Promise<Record<string, string
                         }
                     }
                 } else {
-                    reject();
+                    reject(check);
                 }
             })();
         });
 
         request.on("error", (error: Error) => {
+            ControllerHelper.writeLog("Upload.ts - execute() - error: ", ControllerHelper.objectOutput(error));
+
             reject(error);
         });
     });

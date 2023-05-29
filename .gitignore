@@ -14,11 +14,18 @@ pnpm-debug.log*
 *.sw?
 
 # cimo +
+.cache/*
+.config/*
+.npm/*
+.pki/*
 certificate/*
 !certificate/.gitkeep
 dist/*
 file/*
+!file/**/
+file/input/*
 !file/input/.gitkeep
+file/output/*
 !file/output/.gitkeep
 log/*
 !log/.gitkeep
