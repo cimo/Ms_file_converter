@@ -19,6 +19,9 @@ pnpm-debug.log*
 .npm/*
 .pki/*
 certificate/*
+!certificate/**
+certificate/proxy/*
+!certificate/proxy/.gitkeep
 !certificate/.gitkeep
 dist/*
 file/*

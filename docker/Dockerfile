@@ -13,7 +13,6 @@ ENV VERSION_TAG=${_VERSION_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DEBCONF_NOWARNINGS=yes
-ENV SUDO_FORCE_REMOVE=yes
 
 COPY ./docker/nodejs_18_setup.sh /home/nodejs_18_setup.sh
 COPY ./ /home/root/
