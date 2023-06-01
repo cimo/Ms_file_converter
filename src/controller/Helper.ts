@@ -2,7 +2,7 @@ import Express from "express";
 import Fs from "fs";
 
 // Source
-import * as ModelHelper from "../Model/Helper";
+import * as ModelHelper from "../model/Helper";
 
 export const checkEnv = (key: string, value: string | undefined): string => {
     if (value === undefined) {

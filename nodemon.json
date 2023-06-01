@@ -1,5 +1,5 @@
 {
     "ext": "ts",
     "watch": ["src"],
-    "exec": "npm run build && node ./dist/Controller/Server.js"
+    "exec": "npm run build && node ./dist/controller/Server.js"
 }

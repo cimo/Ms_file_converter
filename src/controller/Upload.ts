@@ -2,7 +2,7 @@ import Express from "express";
 import * as FormDataParser from "@cimo/form-data_parser";
 
 // Source
-import * as ControllerHelper from "../Controller/Helper";
+import * as ControllerHelper from "../controller/Helper";
 
 const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
     const parameterList: string[] = [];
@@ -42,13 +42,15 @@ const checkRequest = (formDataList: FormDataParser.Iinput[]): boolean => {
         parameterNotFound = "file";
     }
 
-    ControllerHelper.writeLog(
-        "Upload.ts - checkRequest",
-        `tokenWrong: ${tokenWrong.toString()} - fileProblem: ${fileProblem.toString()} - parameterNotFound: ${parameterNotFound}`
-    );
-
     // Result
     const result = tokenWrong === false && fileProblem === "" && parameterNotFound === "" ? true : false;
+
+    if (!result) {
+        ControllerHelper.writeLog(
+            "Upload.ts - checkRequest",
+            `tokenWrong: ${tokenWrong.toString()} - fileProblem: ${fileProblem.toString()} - parameterNotFound: ${parameterNotFound}`
+        );
+    }
 
     return result;
 };

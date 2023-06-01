@@ -48,6 +48,6 @@ WORKDIR /home/root/
 
 RUN npm install && npm run build
 
-CMD node /home/root/dist/Controller/Server.js
+CMD node /home/root/dist/controller/Server.js
 
 EXPOSE ${_SERVER_PORT}

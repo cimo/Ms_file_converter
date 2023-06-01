@@ -5,9 +5,9 @@ import CookieParser from "cookie-parser";
 import Cors from "cors";
 
 // Source
-import * as ControllerHelper from "../Controller/Helper";
-import * as ControllerConverter from "../Controller/Converter";
-import * as ModelServer from "../Model/Server";
+import * as ControllerHelper from "../controller/Helper";
+import * as ControllerConverter from "../controller/Converter";
+import * as ModelServer from "../model/Server";
 
 const corsOption: ModelServer.Icors = {
     originList: ControllerHelper.CORS_ORIGIN_URL,

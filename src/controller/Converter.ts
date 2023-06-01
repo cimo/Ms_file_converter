@@ -3,8 +3,8 @@ import Path from "path";
 import { exec } from "child_process";
 
 // Source
-import * as ControllerHelper from "../Controller/Helper";
-import * as ControllerUpload from "../Controller/Upload";
+import * as ControllerHelper from "../controller/Helper";
+import * as ControllerUpload from "../controller/Upload";
 
 const removeFile = (input: string, output: string, response: Express.Response) => {
     void (async () => {
