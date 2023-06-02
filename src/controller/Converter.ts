@@ -19,17 +19,14 @@ const removeFile = (input: string, output: string, response: Express.Response) =
         await ControllerHelper.fileRemove(output)
             .then()
             .catch((error: Error) => {
-                ControllerHelper.writeLog(
-                    "Converter.ts - ControllerHelper.fileRemove() - output catch error: ",
-                    ControllerHelper.objectOutput(error)
-                );
+                ControllerHelper.writeLog("Ocr.ts - ControllerHelper.fileRemove() - output catch error: ", ControllerHelper.objectOutput(error));
 
                 ControllerHelper.responseBody("", error, response, 500);
             });
     })();
 };
 
-const pdf = (input: string, output: string, response: Express.Response) => {
+const outputFile = (input: string, output: string, response: Express.Response) => {
     void (async () => {
         await ControllerHelper.fileReadStream(output)
             .then((buffer) => {
@@ -59,13 +56,13 @@ export const execute = (app: Express.Express): void => {
                         `soffice --headless --convert-to pdf "${result}" --outdir "${ControllerHelper.PATH_FILE_OUTPUT}"`,
                         (error, stdout, stderr) => {
                             if (stdout !== "" && stderr === "") {
-                                pdf(result, output, response);
+                                outputFile(result, output, response);
                             } else if (stdout === "" && stderr !== "") {
                                 ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
 
                                 removeFile(result, output, response);
                             } else {
-                                pdf(result, output, response);
+                                outputFile(result, output, response);
                             }
                         }
                     );
