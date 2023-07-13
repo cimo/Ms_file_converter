@@ -35,11 +35,11 @@ export const execute = (app: Express.Express): void => {
                                         })
                                         .catch((error: Error) => {
                                             ControllerHelper.writeLog(
-                                                "Converter.ts - ControllerHelper.fileReadStream() - catch error",
+                                                "Converter.ts - ControllerHelper.fileReadStream(output) - catch error",
                                                 ControllerHelper.objectOutput(error)
                                             );
 
-                                            ControllerHelper.responseBody("", error, response, 500);
+                                            ControllerHelper.responseBody(stdout, error, response, 500);
                                         });
 
                                     await ControllerHelper.fileRemove(input)
