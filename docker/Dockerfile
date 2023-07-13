@@ -30,10 +30,10 @@ RUN cd ~ \
     # Apt
     && apt-get update && apt-get install -y \
     ca-certificates \
-    default-jre \
-    libreoffice --no-install-recommends \
     fonts-noto \
     fonts-noto-cjk \
+    default-jre \
+    libreoffice --no-install-recommends \
     # Certificate
     && update-ca-certificates \
     # Clean

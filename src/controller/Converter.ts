@@ -1,74 +1,84 @@
 import Express from "express";
-import Path from "path";
 import { exec } from "child_process";
+import Path from "path";
 
 // Source
 import * as ControllerHelper from "../controller/Helper";
 import * as ControllerUpload from "../controller/Upload";
 
-const removeFile = (input: string, output: string, response: Express.Response) => {
-    void (async () => {
-        await ControllerHelper.fileRemove(input)
-            .then()
-            .catch((error: Error) => {
-                ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileRemove() - input catch error: ", ControllerHelper.objectOutput(error));
-
-                ControllerHelper.responseBody("", error, response, 500);
-            });
-
-        await ControllerHelper.fileRemove(output)
-            .then()
-            .catch((error: Error) => {
-                ControllerHelper.writeLog("Ocr.ts - ControllerHelper.fileRemove() - output catch error: ", ControllerHelper.objectOutput(error));
-
-                ControllerHelper.responseBody("", error, response, 500);
-            });
-    })();
-};
-
-const outputFile = (input: string, output: string, response: Express.Response) => {
-    void (async () => {
-        await ControllerHelper.fileReadStream(output)
-            .then((buffer) => {
-                removeFile(input, output, response);
-
-                ControllerHelper.responseBody(buffer.toString("base64"), "", response, 200);
-            })
-            .catch((error: Error) => {
-                ControllerHelper.writeLog("Converter.ts - ControllerHelper.fileReadStream - catch error", ControllerHelper.objectOutput(error));
-
-                removeFile(input, output, response);
-
-                ControllerHelper.responseBody("", error, response, 500);
-            });
-    })();
-};
-
 export const execute = (app: Express.Express): void => {
     app.post("/msfileconverter/pdf", (request: Express.Request, response: Express.Response) => {
         void (async () => {
-            await ControllerUpload.execute(request)
-                .then((result) => {
-                    const fileName = Path.parse(result).name;
-                    const output = `${ControllerHelper.PATH_FILE_OUTPUT}${fileName}.pdf`;
+            await ControllerUpload.execute(request, true)
+                .then((resultList) => {
+                    let fileName = "";
+
+                    for (const value of resultList) {
+                        if (value.name === "file" && value.filename) {
+                            fileName = value.filename;
+                        }
+                    }
+
+                    const name = Path.parse(fileName).name;
+
+                    const input = `${ControllerHelper.PATH_FILE_INPUT}${fileName}`;
+                    const output = `${ControllerHelper.PATH_FILE_OUTPUT}${name}.pdf`;
 
                     exec(
-                        `soffice --headless --convert-to pdf "${result}" --outdir "${ControllerHelper.PATH_FILE_OUTPUT}"`,
+                        `soffice --headless --convert-to pdf "${input}" --outdir "${ControllerHelper.PATH_FILE_OUTPUT}"`,
                         (error, stdout, stderr) => {
-                            if (stdout !== "" && stderr === "") {
-                                outputFile(result, output, response);
-                            } else if (stdout === "" && stderr !== "") {
-                                ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
+                            void (async () => {
+                                if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
+                                    await ControllerHelper.fileReadStream(output)
+                                        .then((buffer) => {
+                                            ControllerHelper.responseBody(buffer.toString("base64"), "", response, 200);
+                                        })
+                                        .catch((error: Error) => {
+                                            ControllerHelper.writeLog(
+                                                "Converter.ts - ControllerHelper.fileReadStream() - catch error",
+                                                ControllerHelper.objectOutput(error)
+                                            );
 
-                                removeFile(result, output, response);
-                            } else {
-                                outputFile(result, output, response);
-                            }
+                                            ControllerHelper.responseBody("", error, response, 500);
+                                        });
+
+                                    await ControllerHelper.fileRemove(input)
+                                        .then()
+                                        .catch((error: Error) => {
+                                            ControllerHelper.writeLog(
+                                                "Converter.ts - ControllerHelper.fileRemove(input) - catch error: ",
+                                                ControllerHelper.objectOutput(error)
+                                            );
+                                        });
+
+                                    await ControllerHelper.fileRemove(output)
+                                        .then()
+                                        .catch((error: Error) => {
+                                            ControllerHelper.writeLog(
+                                                "Converter.ts - ControllerHelper.fileRemove(output) - catch error: ",
+                                                ControllerHelper.objectOutput(error)
+                                            );
+                                        });
+                                } else if (stdout === "" && stderr !== "") {
+                                    ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
+
+                                    await ControllerHelper.fileRemove(input)
+                                        .then()
+                                        .catch((error: Error) => {
+                                            ControllerHelper.writeLog(
+                                                "Converter.ts - ControllerHelper.fileRemove(input) - catch error: ",
+                                                ControllerHelper.objectOutput(error)
+                                            );
+                                        });
+
+                                    ControllerHelper.responseBody("", stderr, response, 500);
+                                }
+                            })();
                         }
                     );
                 })
                 .catch((error: Error) => {
-                    ControllerHelper.writeLog("Converter.ts - /msfileconverter/pdf - catch error: ", ControllerHelper.objectOutput(error));
+                    ControllerHelper.writeLog("Converter.ts - ControllerUpload.execute() - catch error: ", ControllerHelper.objectOutput(error));
 
                     ControllerHelper.responseBody("", error, response, 500);
                 });
