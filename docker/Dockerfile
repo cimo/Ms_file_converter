@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ARG _ENV_NAME
 ARG _DOMAIN
@@ -19,6 +19,7 @@ COPY ./certificate/proxy/ /usr/local/share/ca-certificates/
 COPY ./ /home/root/
 
 RUN cd ~ \
+    && VERSION_CODENAME=$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) \
     && chmod -R 0644 /usr/local/share/ca-certificates/ \
     && apt-get update && apt-get install -y ca-certificates gnupg curl \
     && update-ca-certificates \
@@ -30,9 +31,9 @@ RUN cd ~ \
     # No root
     && groupadd -g 1000 node \
     && useradd -d /home/root/ -s /bin/bash -u 1000 -g 1000 node \
-    && mkdir -p /home/root/ /usr/local/lib/node_modules/ \
+    && mkdir -p /home/root/ /usr/local/lib/node_modules/ /usr/local/bin/ \
     && chown -R node:node /home/root/ /usr/local/lib/node_modules/ /usr/local/bin/ \
-    && chmod 775 /home/root/ /usr/local/lib/node_modules/ /usr/local/bin/ \
+    && chmod -R 775 /home/root/ /usr/local/lib/node_modules/ /usr/local/bin/ \
     # Apt
     && apt-get update && apt-get install -y \
     fonts-noto \

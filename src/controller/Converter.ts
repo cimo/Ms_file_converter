@@ -1,87 +1,113 @@
-import Express from "express";
-import { exec } from "child_process";
+import Express, { Request, Response } from "express";
 import Path from "path";
+import { execFile } from "child_process";
+import { Ca } from "@cimo/authentication";
 
 // Source
-import * as ControllerHelper from "../controller/Helper";
-import * as ControllerUpload from "../controller/Upload";
+import * as HelperSrc from "../HelperSrc";
+import ControllerUpload from "./Upload";
 
-export const execute = (app: Express.Express): void => {
-    app.post("/msfileconverter/pdf", (request: Express.Request, response: Express.Response) => {
+export default class ControllerConverter {
+    // Variable
+    private app: Express.Express;
+    private controllerUpload: ControllerUpload;
+
+    // Method
+    constructor(app: Express.Express) {
+        this.app = app;
+        this.controllerUpload = new ControllerUpload();
+    }
+
+    api = (): void => {
+        this.app.post("/api/toPdf", Ca.authenticationMiddleware, (request: Request, response: Response) => {
+            this.execute("pdf", request, response);
+        });
+
+        this.app.post("/api/toJpg", Ca.authenticationMiddleware, (request: Request, response: Response) => {
+            this.execute("jpg", request, response);
+        });
+    };
+
+    private execute = (mode: string, request: Request, response: Response) => {
         void (async () => {
-            await ControllerUpload.execute(request, true)
-                .then((resultList) => {
-                    let fileName = "";
+            await this.controllerUpload
+                .execute(request, true)
+                .then((resultControllerUploadList) => {
+                    let filename = "";
 
-                    for (const value of resultList) {
-                        if (value.name === "file" && value.filename) {
-                            fileName = value.filename;
+                    for (const resultControllerUpload of resultControllerUploadList) {
+                        if (resultControllerUpload.name === "file" && resultControllerUpload.filename) {
+                            filename = resultControllerUpload.filename;
+
+                            break;
                         }
                     }
 
-                    const name = Path.parse(fileName).name;
+                    const input = `${HelperSrc.PATH_FILE_INPUT}${filename}`;
+                    const output = `${HelperSrc.PATH_FILE_OUTPUT}${Path.parse(filename).name}.${mode}`;
 
-                    const input = `${ControllerHelper.PATH_FILE_INPUT}${fileName}`;
-                    const output = `${ControllerHelper.PATH_FILE_OUTPUT}${name}.pdf`;
+                    const execCommand = `. ${HelperSrc.PATH_FILE_SCRIPT}command1.sh`;
+                    const execArgumentList = [`"${mode}"`, `"${input}"`, `"${HelperSrc.PATH_FILE_OUTPUT}"`];
 
-                    exec(
-                        `soffice --headless --convert-to pdf "${input}" --outdir "${ControllerHelper.PATH_FILE_OUTPUT}"`,
-                        (error, stdout, stderr) => {
-                            void (async () => {
-                                if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
-                                    await ControllerHelper.fileReadStream(output)
-                                        .then((buffer) => {
-                                            ControllerHelper.responseBody(buffer.toString("base64"), "", response, 200);
-                                        })
-                                        .catch((error: Error) => {
-                                            ControllerHelper.writeLog(
-                                                "Converter.ts - ControllerHelper.fileReadStream(output) - catch error",
-                                                ControllerHelper.objectOutput(error)
-                                            );
+                    execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
+                        if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
+                            HelperSrc.fileReadStream(output, (resultFileReadStream) => {
+                                if (Buffer.isBuffer(resultFileReadStream)) {
+                                    HelperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
+                                } else {
+                                    HelperSrc.writeLog(
+                                        `Converter.ts - api() => post(/api/${mode}) => execute() => execFile(soffice) => fileReadStream()`,
+                                        resultFileReadStream.toString()
+                                    );
 
-                                            ControllerHelper.responseBody(stdout, error, response, 500);
-                                        });
-
-                                    await ControllerHelper.fileRemove(input)
-                                        .then()
-                                        .catch((error: Error) => {
-                                            ControllerHelper.writeLog(
-                                                "Converter.ts - ControllerHelper.fileRemove(input) - catch error: ",
-                                                ControllerHelper.objectOutput(error)
-                                            );
-                                        });
-
-                                    await ControllerHelper.fileRemove(output)
-                                        .then()
-                                        .catch((error: Error) => {
-                                            ControllerHelper.writeLog(
-                                                "Converter.ts - ControllerHelper.fileRemove(output) - catch error: ",
-                                                ControllerHelper.objectOutput(error)
-                                            );
-                                        });
-                                } else if (stdout === "" && stderr !== "") {
-                                    ControllerHelper.writeLog("Converter.ts - exec('soffice... - stderr", stderr);
-
-                                    await ControllerHelper.fileRemove(input)
-                                        .then()
-                                        .catch((error: Error) => {
-                                            ControllerHelper.writeLog(
-                                                "Converter.ts - ControllerHelper.fileRemove(input) - catch error: ",
-                                                ControllerHelper.objectOutput(error)
-                                            );
-                                        });
-
-                                    ControllerHelper.responseBody("", stderr, response, 500);
+                                    HelperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
                                 }
-                            })();
+
+                                HelperSrc.fileRemove(input, (resultFileRemove) => {
+                                    if (typeof resultFileRemove !== "boolean") {
+                                        HelperSrc.writeLog(
+                                            `Converter.ts - api() => post(/api/${mode}) => execute() => execFile(soffice) => fileReadStream() => fileRemove(input)`,
+                                            resultFileRemove.toString()
+                                        );
+
+                                        HelperSrc.responseBody("", resultFileRemove.toString(), response, 500);
+                                    }
+                                });
+
+                                HelperSrc.fileRemove(output, (resultFileRemove) => {
+                                    if (typeof resultFileRemove !== "boolean") {
+                                        HelperSrc.writeLog(
+                                            `Converter.ts - api() => post(/api/${mode}) => execute() => execFile(soffice) => fileReadStream() => fileRemove(output)`,
+                                            resultFileRemove.toString()
+                                        );
+
+                                        HelperSrc.responseBody("", resultFileRemove.toString(), response, 500);
+                                    }
+                                });
+                            });
+                        } else if (stdout === "" && stderr !== "") {
+                            HelperSrc.writeLog(`Converter.ts - api() => post(/api/${mode}) => execute() => execFile(soffice) => stderr`, stderr);
+
+                            HelperSrc.fileRemove(input, (resultFileRemove) => {
+                                if (typeof resultFileRemove !== "boolean") {
+                                    stderr += resultFileRemove;
+
+                                    HelperSrc.writeLog(
+                                        `Converter.ts - api() => post(/api/${mode}) => execute() => execFile(soffice) => fileRemove(input)`,
+                                        resultFileRemove.toString()
+                                    );
+                                }
+                            });
+
+                            HelperSrc.responseBody("", stderr, response, 500);
                         }
-                    );
+                    });
                 })
                 .catch((error: Error) => {
-                    ControllerHelper.writeLog("Converter.ts - ControllerUpload.execute() - catch error: ", ControllerHelper.objectOutput(error));
+                    HelperSrc.writeLog(`Converter.ts - api() => post(/api/${mode}) => execute() => catch()`, error);
 
-                    ControllerHelper.responseBody("", error, response, 500);
+                    HelperSrc.responseBody("", error, response, 500);
                 });
         })();
-    });
-};
+    };
+}
