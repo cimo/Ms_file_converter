@@ -47,6 +47,8 @@
         "serve-static": "1.16.0",
         "**/serve-static": "1.16.0",
         "body-parser": "1.20.3",
-        "**/body-parser": "1.20.3"
+        "**/body-parser": "1.20.3",
+        "cookie": "0.7.0",
+        "**/cookie": "0.7.0"
     }
 }
