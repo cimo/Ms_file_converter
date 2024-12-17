@@ -43,11 +43,11 @@ export default class ControllerConverter {
                         }
                     }
 
-                    const input = `${HelperSrc.PATH_FILE_INPUT}${filename}`;
-                    const output = `${HelperSrc.PATH_FILE_OUTPUT}${Path.parse(filename).name}.${mode}`;
+                    const input = `${HelperSrc.PATH_ROOT}${HelperSrc.PATH_FILE_INPUT}${filename}`;
+                    const output = `${HelperSrc.PATH_ROOT}${HelperSrc.PATH_FILE_OUTPUT}${Path.parse(filename).name}.${mode}`;
 
-                    const execCommand = `. ${HelperSrc.PATH_FILE_SCRIPT}command1.sh`;
-                    const execArgumentList = [`"${mode}"`, `"${input}"`, `"${HelperSrc.PATH_FILE_OUTPUT}"`];
+                    const execCommand = `. ${HelperSrc.PATH_ROOT}${HelperSrc.PATH_FILE_SCRIPT}command1.sh`;
+                    const execArgumentList = [`"${mode}"`, `"${input}"`, `"${HelperSrc.PATH_ROOT}${HelperSrc.PATH_FILE_OUTPUT}"`];
 
                     execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
                         if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
