@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   cimo_ms_file_converter:
     container_name: cimo-ms-file-converter
