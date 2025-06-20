@@ -57,6 +57,7 @@ WORKDIR ${PATH_ROOT}
 # Tls
 CMD cp -r ${PATH_ROOT}.ms_cronjob-volume/certificate/* ${PATH_ROOT}certificate/ \
     # Npm
+    && rm -rf node_modules package-lock.json \
     && npm install \
     && npm run execute
 

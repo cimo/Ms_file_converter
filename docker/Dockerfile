@@ -57,7 +57,8 @@ USER node
 
 WORKDIR ${PATH_ROOT}
 
-RUN npm install \
+RUN rm -rf node_modules package-lock.json \
+    && npm install \
     && npm run build
 
 CMD node ${PATH_ROOT}dist/controller/Server.js
