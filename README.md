@@ -33,6 +33,7 @@ docker compose -f docker-compose.yaml --env-file ./env/local.env up --detach --p
     - package-lock.json
     - certificate/tls.crt
     - certificate/tls.key
+    - certificate/tls.pem
 
 2. Follow the "Installation" instructions.
 
