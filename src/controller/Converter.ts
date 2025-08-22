@@ -7,7 +7,7 @@ import { Ca } from "@cimo/authentication/dist/src/Main";
 import * as helperSrc from "../HelperSrc";
 import ControllerUpload from "./Upload";
 
-export default class ControllerConverter {
+export default class Converter {
     // Variable
     private app: Express.Express;
     private controllerUpload: ControllerUpload;
@@ -33,18 +33,18 @@ export default class ControllerConverter {
             await this.controllerUpload
                 .execute(request, true)
                 .then((resultControllerUploadList) => {
-                    let filename = "";
+                    let fileName = "";
 
                     for (const resultControllerUpload of resultControllerUploadList) {
-                        if (resultControllerUpload.name === "file" && resultControllerUpload.filename) {
-                            filename = resultControllerUpload.filename;
+                        if (resultControllerUpload.name === "file" && resultControllerUpload.fileName) {
+                            fileName = resultControllerUpload.fileName;
 
                             break;
                         }
                     }
 
-                    const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_INPUT}${filename}`;
-                    const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${Path.parse(filename).name}.${mode}`;
+                    const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_INPUT}${fileName}`;
+                    const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${Path.parse(fileName).name}.${mode}`;
 
                     const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_SCRIPT}command1.sh`;
                     const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}"`];
@@ -56,7 +56,7 @@ export default class ControllerConverter {
                                     helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
                                 } else {
                                     helperSrc.writeLog(
-                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile(soffice) - fileReadStream()`,
+                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream()`,
                                         resultFileReadStream.toString()
                                     );
 
@@ -66,7 +66,7 @@ export default class ControllerConverter {
                                 helperSrc.fileRemove(input, (resultFileRemove) => {
                                     if (typeof resultFileRemove !== "boolean") {
                                         helperSrc.writeLog(
-                                            `Converter.ts - api() - post(/api/${mode}) - execute() - execFile(soffice) - fileReadStream() - fileRemove(input)`,
+                                            `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(input)`,
                                             resultFileRemove.toString()
                                         );
 
@@ -77,7 +77,7 @@ export default class ControllerConverter {
                                 helperSrc.fileRemove(output, (resultFileRemove) => {
                                     if (typeof resultFileRemove !== "boolean") {
                                         helperSrc.writeLog(
-                                            `Converter.ts - api() - post(/api/${mode}) - execute() - execFile(soffice) - fileReadStream() - fileRemove(output)`,
+                                            `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(output)`,
                                             resultFileRemove.toString()
                                         );
 
@@ -86,14 +86,14 @@ export default class ControllerConverter {
                                 });
                             });
                         } else if (stdout === "" && stderr !== "") {
-                            helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile(soffice) - stderr`, stderr);
+                            helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - stderr`, stderr);
 
                             helperSrc.fileRemove(input, (resultFileRemove) => {
                                 if (typeof resultFileRemove !== "boolean") {
                                     stderr += resultFileRemove;
 
                                     helperSrc.writeLog(
-                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile(soffice) - fileRemove(input)`,
+                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileRemove(input)`,
                                         resultFileRemove.toString()
                                     );
                                 }
