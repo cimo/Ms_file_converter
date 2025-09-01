@@ -1,5 +1,5 @@
 import Express, { Request, Response, NextFunction } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
 import CookieParser from "cookie-parser";
 import Cors from "cors";
 import * as Http from "http";
@@ -15,7 +15,7 @@ import ControllerConverter from "./Converter";
 export default class Server {
     // Variable
     private corsOption: modelServer.Icors;
-    private limiter: ReturnType<typeof rateLimit>;
+    private limiter: RateLimitRequestHandler;
     private app: Express.Express;
 
     // Method
@@ -95,7 +95,7 @@ export default class Server {
         const server = creation;
 
         server.listen(helperSrc.SERVER_PORT, () => {
-            const controllerConverter = new ControllerConverter(this.app);
+            const controllerConverter = new ControllerConverter(this.app, this.limiter);
             controllerConverter.api();
 
             const serverTime = helperSrc.serverTime();

@@ -1,4 +1,5 @@
 import Express, { Request, Response } from "express";
+import { RateLimitRequestHandler } from "express-rate-limit";
 import Path from "path";
 import { execFile } from "child_process";
 import { Ca } from "@cimo/authentication/dist/src/Main";
@@ -10,104 +11,104 @@ import ControllerUpload from "./Upload";
 export default class Converter {
     // Variable
     private app: Express.Express;
+    private limiter: RateLimitRequestHandler;
     private controllerUpload: ControllerUpload;
 
     // Method
-    constructor(app: Express.Express) {
+    constructor(app: Express.Express, limiter: RateLimitRequestHandler) {
         this.app = app;
+        this.limiter = limiter;
         this.controllerUpload = new ControllerUpload();
     }
 
     api = (): void => {
-        this.app.post("/api/toPdf", Ca.authenticationMiddleware, (request: Request, response: Response) => {
+        this.app.post("/api/toPdf", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
             this.execute("pdf", request, response);
         });
 
-        this.app.post("/api/toJpg", Ca.authenticationMiddleware, (request: Request, response: Response) => {
+        this.app.post("/api/toJpg", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
             this.execute("jpg", request, response);
         });
     };
 
     private execute = (mode: string, request: Request, response: Response) => {
-        void (async () => {
-            await this.controllerUpload
-                .execute(request, true)
-                .then((resultControllerUploadList) => {
-                    let fileName = "";
+        this.controllerUpload
+            .execute(request, true)
+            .then((resultControllerUploadList) => {
+                let fileName = "";
 
-                    for (const resultControllerUpload of resultControllerUploadList) {
-                        if (resultControllerUpload.name === "file" && resultControllerUpload.fileName) {
-                            fileName = resultControllerUpload.fileName;
+                for (const resultControllerUpload of resultControllerUploadList) {
+                    if (resultControllerUpload.name === "file" && resultControllerUpload.fileName) {
+                        fileName = resultControllerUpload.fileName;
 
-                            break;
-                        }
+                        break;
                     }
+                }
 
-                    const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_INPUT}${fileName}`;
-                    const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${Path.parse(fileName).name}.${mode}`;
+                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_INPUT}${fileName}`;
+                const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${Path.parse(fileName).name}.${mode}`;
 
-                    const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_SCRIPT}command1.sh`;
-                    const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}"`];
+                const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_SCRIPT}command1.sh`;
+                const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}"`];
 
-                    execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
-                        if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
-                            helperSrc.fileReadStream(output, (resultFileReadStream) => {
-                                if (Buffer.isBuffer(resultFileReadStream)) {
-                                    helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
-                                } else {
-                                    helperSrc.writeLog(
-                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream()`,
-                                        resultFileReadStream.toString()
-                                    );
+                execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
+                    if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
+                        helperSrc.fileReadStream(output, (resultFileReadStream) => {
+                            if (Buffer.isBuffer(resultFileReadStream)) {
+                                helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
+                            } else {
+                                helperSrc.writeLog(
+                                    `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream()`,
+                                    resultFileReadStream.toString()
+                                );
 
-                                    helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
-                                }
-
-                                helperSrc.fileRemove(input, (resultFileRemove) => {
-                                    if (typeof resultFileRemove !== "boolean") {
-                                        helperSrc.writeLog(
-                                            `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(input)`,
-                                            resultFileRemove.toString()
-                                        );
-
-                                        helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
-                                    }
-                                });
-
-                                helperSrc.fileRemove(output, (resultFileRemove) => {
-                                    if (typeof resultFileRemove !== "boolean") {
-                                        helperSrc.writeLog(
-                                            `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(output)`,
-                                            resultFileRemove.toString()
-                                        );
-
-                                        helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
-                                    }
-                                });
-                            });
-                        } else if (stdout === "" && stderr !== "") {
-                            helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - stderr`, stderr);
+                                helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
+                            }
 
                             helperSrc.fileRemove(input, (resultFileRemove) => {
                                 if (typeof resultFileRemove !== "boolean") {
-                                    stderr += resultFileRemove;
-
                                     helperSrc.writeLog(
-                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileRemove(input)`,
+                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(input)`,
                                         resultFileRemove.toString()
                                     );
+
+                                    helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
                                 }
                             });
 
-                            helperSrc.responseBody("", stderr, response, 500);
-                        }
-                    });
-                })
-                .catch((error: Error) => {
-                    helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error);
+                            helperSrc.fileRemove(output, (resultFileRemove) => {
+                                if (typeof resultFileRemove !== "boolean") {
+                                    helperSrc.writeLog(
+                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(output)`,
+                                        resultFileRemove.toString()
+                                    );
 
-                    helperSrc.responseBody("", error, response, 500);
+                                    helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
+                                }
+                            });
+                        });
+                    } else if (stdout === "" && stderr !== "") {
+                        helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - stderr`, stderr);
+
+                        helperSrc.fileRemove(input, (resultFileRemove) => {
+                            if (typeof resultFileRemove !== "boolean") {
+                                stderr += resultFileRemove;
+
+                                helperSrc.writeLog(
+                                    `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileRemove(input)`,
+                                    resultFileRemove.toString()
+                                );
+                            }
+                        });
+
+                        helperSrc.responseBody("", stderr, response, 500);
+                    }
                 });
-        })();
+            })
+            .catch((error: Error) => {
+                helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error);
+
+                helperSrc.responseBody("", error, response, 500);
+            });
     };
 }
