@@ -64,7 +64,6 @@ form-data
 
 key             value
 ---             ---
-fileName        test
 file            "upload field"
 ```
 
