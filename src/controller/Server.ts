@@ -80,7 +80,7 @@ export default class Server {
     createServer = (): void => {
         let creation: Http.Server | Https.Server;
 
-        if (helperSrc.locationFromEnvName() === "jp") {
+        if (helperSrc.localeFromEnvName() === "jp") {
             creation = Https.createServer(
                 {
                     key: Fs.readFileSync(`${helperSrc.PATH_ROOT}${helperSrc.PATH_CERTIFICATE_KEY}`),
@@ -98,9 +98,10 @@ export default class Server {
             const controllerConverter = new ControllerConverter(this.app, this.limiter);
             controllerConverter.api();
 
-            const serverTime = helperSrc.serverTime();
-
-            helperSrc.writeLog("Server.ts - createServer() - listen()", `Port: ${helperSrc.SERVER_PORT} - Time: ${serverTime}`);
+            helperSrc.writeLog(
+                "Server.ts - createServer() - listen()",
+                `Port: ${helperSrc.SERVER_PORT} - Time: ${helperSrc.localeFormat(new Date())}`
+            );
 
             this.app.get("/", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
                 if (request.accepts("html")) {
