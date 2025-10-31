@@ -45,15 +45,17 @@ export default class Converter {
                     }
                 }
 
+                const uniqueId = helperSrc.generateUniqueId();
+
                 const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_INPUT}${fileName}`;
-                const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${Path.parse(fileName).name}.${mode}`;
+                const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${uniqueId}/`;
 
                 const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_SCRIPT}command1.sh`;
-                const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}"`];
+                const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}"`, `"${uniqueId}"`];
 
                 execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
                     if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
-                        helperSrc.fileReadStream(output, (resultFileReadStream) => {
+                        helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`, (resultFileReadStream) => {
                             if (Buffer.isBuffer(resultFileReadStream)) {
                                 helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
                             } else {
@@ -64,45 +66,34 @@ export default class Converter {
 
                                 helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
                             }
-
-                            helperSrc.fileRemove(input, (resultFileRemove) => {
-                                if (typeof resultFileRemove !== "boolean") {
-                                    helperSrc.writeLog(
-                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(input)`,
-                                        resultFileRemove.toString()
-                                    );
-
-                                    helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
-                                }
-                            });
-
-                            helperSrc.fileRemove(output, (resultFileRemove) => {
-                                if (typeof resultFileRemove !== "boolean") {
-                                    helperSrc.writeLog(
-                                        `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream() - fileRemove(output)`,
-                                        resultFileRemove.toString()
-                                    );
-
-                                    helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
-                                }
-                            });
                         });
                     } else if (stdout === "" && stderr !== "") {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - stderr`, stderr);
 
-                        helperSrc.fileRemove(input, (resultFileRemove) => {
-                            if (typeof resultFileRemove !== "boolean") {
-                                stderr += resultFileRemove;
-
-                                helperSrc.writeLog(
-                                    `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileRemove(input)`,
-                                    resultFileRemove.toString()
-                                );
-                            }
-                        });
-
                         helperSrc.responseBody("", stderr, response, 500);
                     }
+
+                    helperSrc.fileOrFolderRemove(input, (resultFileRemove) => {
+                        if (typeof resultFileRemove !== "boolean") {
+                            helperSrc.writeLog(
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove(input)`,
+                                resultFileRemove.toString()
+                            );
+
+                            helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
+                        }
+                    });
+
+                    helperSrc.fileOrFolderRemove(output, (resultFileRemove) => {
+                        if (typeof resultFileRemove !== "boolean") {
+                            helperSrc.writeLog(
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove(output)`,
+                                resultFileRemove.toString()
+                            );
+
+                            helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
+                        }
+                    });
                 });
             })
             .catch((error: Error) => {
