@@ -19,5 +19,7 @@ services:
       - ms_cronjob-volume:${PATH_ROOT}.ms_cronjob-volume/:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:${PATH_ROOT}
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
 volumes:
   ms_cronjob-volume:

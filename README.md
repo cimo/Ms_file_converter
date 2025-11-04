@@ -4,6 +4,12 @@ Microservice file converter.
 
 Depend from Ms_cronjob (use the volume "ms_cronjob-volume" for share the certificate).
 
+## Info:
+
+-   Cross platform (Windows, Linux)
+-   X11 for WSL2 (Run linux GUI app directly in windows).
+-   Libre office
+
 ## Installation
 
 1. For full build write on terminal:
@@ -25,6 +31,7 @@ docker compose -f docker-compose.yaml --env-file ./env/local.env up --detach --p
 
     - .cache
     - .config
+    - .dbus
     - .ms_cronjob-volume
     - .npm
     - node_modules
@@ -34,6 +41,12 @@ docker compose -f docker-compose.yaml --env-file ./env/local.env up --detach --p
     - certificate/tls.pem
 
 2. Follow the "Installation" instructions.
+
+3. For execute "Libre office" GUI write on terminal:
+
+    ```
+    bash script/libreoffice.sh
+    ```
 
 ## Api (Postman)
 

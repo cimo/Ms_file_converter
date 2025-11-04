@@ -4,6 +4,7 @@
         ".git",
         ".cache",
         ".config",
+        ".dbus",
         ".ms_cronjob-volume",
         ".npm",
         "dist",

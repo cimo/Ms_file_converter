@@ -23,6 +23,7 @@ pnpm-debug.log*
 # cimo +
 .cache
 .config
+.dbus
 .ms_cronjob-volume
 .npm
 certificate/*

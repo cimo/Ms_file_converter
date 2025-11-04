@@ -43,9 +43,12 @@ RUN cd ~ \
     # Apt
     && apt-get update && apt-get install -y \
     media-types \
+    # Dbus
+    dbus \
+    dbus-x11 \
     # Libre office
     default-jre \
-    libreoffice --no-install-recommends \
+    libreoffice \
     # Clean
     && apt-get remove --purge -y sudo \
     && rm -rf /var/lib/apt/lists/* \
