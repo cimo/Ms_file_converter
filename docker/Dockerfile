@@ -22,6 +22,7 @@ ENV SUDO_FORCE_REMOVE=yes
 ENV NODE_OPTIONS=--use-openssl-ca
 
 COPY ./certificate/proxy/ /usr/local/share/ca-certificates/
+COPY ./docker/NotoSansJP-Regular.ttf /usr/share/fonts/truetype/noto/
 COPY ./ ${PATH_ROOT}
 
 RUN cd ~ \
@@ -41,8 +42,6 @@ RUN cd ~ \
     && apt-get install -y nodejs \
     # Apt
     && apt-get update && apt-get install -y \
-    fonts-noto \
-    fonts-noto-cjk \
     media-types \
     # Libre office
     default-jre \
