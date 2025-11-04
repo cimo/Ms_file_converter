@@ -44,6 +44,7 @@ RUN cd ~ \
     fonts-noto \
     fonts-noto-cjk \
     media-types \
+    # Libre office
     default-jre \
     libreoffice --no-install-recommends \
     # Clean
