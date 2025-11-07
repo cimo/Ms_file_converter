@@ -59,7 +59,7 @@ USER node
 WORKDIR ${PATH_ROOT}
 
 # Npm
-CMD rm -rf node_modules package-lock.json \
+CMD rm -rf node_modules/ package-lock.json \
     && npm install \
     && npm run execute
 
