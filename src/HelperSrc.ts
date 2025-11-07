@@ -54,11 +54,10 @@ export const URL_ROOT = Ce.checkVariable("MS_FC_URL_ROOT") || (process.env.MS_FC
 export const URL_CORS_ORIGIN = Ce.checkVariable("MS_FC_URL_CORS_ORIGIN") || (process.env.MS_FC_URL_CORS_ORIGIN as string);
 export const PATH_CERTIFICATE_KEY = Ce.checkVariable("MS_FC_PATH_CERTIFICATE_KEY");
 export const PATH_CERTIFICATE_CRT = Ce.checkVariable("MS_FC_PATH_CERTIFICATE_CRT");
-export const PATH_PUBLIC = Ce.checkVariable("MS_FC_PATH_PUBLIC");
+export const PATH_FILE = Ce.checkVariable("MS_FC_PATH_FILE");
 export const PATH_LOG = Ce.checkVariable("MS_FC_PATH_LOG");
-export const PATH_FILE_INPUT = Ce.checkVariable("MS_FC_PATH_FILE_INPUT");
-export const PATH_FILE_OUTPUT = Ce.checkVariable("MS_FC_PATH_FILE_OUTPUT");
-export const PATH_FILE_SCRIPT = Ce.checkVariable("MS_FC_PATH_FILE_SCRIPT");
+export const PATH_PUBLIC = Ce.checkVariable("MS_FC_PATH_PUBLIC");
+export const PATH_SCRIPT = Ce.checkVariable("MS_FC_PATH_SCRIPT");
 export const MIME_TYPE = Ce.checkVariable("MS_FC_MIME_TYPE") || (process.env.MS_FC_MIME_TYPE as string);
 export const FILE_SIZE_MB = Ce.checkVariable("MS_FC_FILE_SIZE_MB") || (process.env.MS_FC_FILE_SIZE_MB as string);
 

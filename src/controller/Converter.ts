@@ -47,11 +47,11 @@ export default class Converter {
 
                 const uniqueId = helperSrc.generateUniqueId();
 
-                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_INPUT}${fileName}`;
-                const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}${uniqueId}/`;
+                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileName}`;
+                const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
-                const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_SCRIPT}command1.sh`;
-                const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE_OUTPUT}"`, `"${uniqueId}"`];
+                const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
+                const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/"`, `"${uniqueId}"`];
 
                 execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
                     if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
