@@ -2,7 +2,7 @@
 
 Microservice file converter.
 
-Depend from Ms_cronjob (use the volume "ms_cronjob-volume" for share the certificate).
+Depend from Ms_cronjob (use "ms_cronjob-volume" for share the certificate).
 It's possible use personal certificate instead "Ms_cronjob", just put the certificate in ".ms_cronjob-volume" folder before the build.
 
 ## Info:
