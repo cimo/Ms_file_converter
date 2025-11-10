@@ -25,6 +25,9 @@ pnpm-debug.log*
 .config
 .dbus
 .npm
+.ms_cronjob-volume/**/*
+!.ms_cronjob-volume/**/
+!.ms_cronjob-volume/**/.gitkeep
 dist
 file/input/*
 !file/input/.gitkeep
@@ -33,7 +36,6 @@ file/output/*
 log/*
 !log/.gitkeep
 node_modules
-package-lock.json
 public/file/*
 !public/file/.gitkeep
 public/asset/js/*
@@ -41,3 +43,4 @@ public/asset/js/*
 public/asset/style/*
 !public/asset/style/.gitkeep
 public/index.html
+package-lock.json
