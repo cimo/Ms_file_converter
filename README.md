@@ -13,16 +13,16 @@ It's possible to use a personal certificate instead of "Ms_cronjob", just add th
 
 ## Installation
 
-1. For full build write on terminal:
+1. For build and up write on terminal:
 
 ```
-bash docker/container_execute.sh
+bash docker/container_execute.sh "local" "build-up"
 ```
 
-2. For light build (just env variable change) remove the container and write on terminal:
+2. Just for up write on terminal:
 
 ```
-bash docker/container_execute.sh "fast"
+bash docker/container_execute.sh "local" "up"
 ```
 
 ## Reset

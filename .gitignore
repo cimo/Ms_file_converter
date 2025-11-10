@@ -24,10 +24,10 @@ pnpm-debug.log*
 .cache
 .config
 .dbus
-.npm
 .ms_cronjob-volume/**/*
 !.ms_cronjob-volume/**/
 !.ms_cronjob-volume/**/.gitkeep
+.npm
 dist
 file/input/*
 !file/input/.gitkeep
