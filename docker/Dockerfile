@@ -21,7 +21,7 @@ ENV DEBCONF_NOWARNINGS=yes
 ENV SUDO_FORCE_REMOVE=yes
 ENV NODE_OPTIONS=--use-openssl-ca
 
-COPY ./.ms_cronjob-volume/certificate/proxy/* /usr/local/share/ca-certificates/
+COPY ./.ms_cronjob-volume/certificate/* /usr/local/share/ca-certificates/
 COPY ./docker/NotoSansJP-Regular.ttf /usr/share/fonts/truetype/noto/
 COPY ./ ${PATH_ROOT}
 
@@ -46,10 +46,41 @@ RUN cd ~ \
     && apt-get update && apt-get install -y \
     dbus \
     dbus-x11 \
+    # GPU
+    && apt-get update && apt-get install -y \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnss3 \
+    libnspr4 \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libxrandr2 \
+    libfreetype6 \
+    libfontconfig1 \
+    libasound2 \
+    libgomp1 \
+    libgbm1 \
+    libglu1-mesa \
+    libvulkan1 \
+    mesa-vulkan-drivers \
+    mesa-utils \
+    xdg-utils \
+    libxcb1 \
+    libx11-xcb1 \
+    libcairo2 \
     # Libre office
     && apt-get update && apt-get install -y \
-    default-jre \
-    libreoffice \
+    libxml2 \
+    libssl3 \
+    libxslt1.1 \
+    libcups2 \
+    && curl -fsSL "https://appimages.libreitalia.org/LibreOffice-still.basic-x86_64.AppImage" -o "/home/libreoffice.AppImage" \
+    && cd /home/ \
+    && chmod +x "/home/libreoffice.AppImage" \
+    && "/home/libreoffice.AppImage" --appimage-extract \
+    && chown -R node:node "/home/squashfs-root/" \
+    && cd ~ \
     # Clean
     && apt-get remove --purge -y sudo \
     && rm -rf /var/lib/apt/lists/* \

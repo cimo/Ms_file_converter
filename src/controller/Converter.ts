@@ -72,28 +72,6 @@ export default class Converter {
 
                         helperSrc.responseBody("", stderr, response, 500);
                     }
-
-                    helperSrc.fileOrFolderRemove(input, (resultFileRemove) => {
-                        if (typeof resultFileRemove !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove(input)`,
-                                resultFileRemove.toString()
-                            );
-
-                            helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
-                        }
-                    });
-
-                    helperSrc.fileOrFolderRemove(output, (resultFileRemove) => {
-                        if (typeof resultFileRemove !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove(output)`,
-                                resultFileRemove.toString()
-                            );
-
-                            helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
-                        }
-                    });
                 });
             })
             .catch((error: Error) => {

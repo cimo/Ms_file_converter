@@ -4,4 +4,4 @@ eval "$(dbus-launch --auto-syntax)"
 
 export NO_AT_BRIDGE=1
 
-libreoffice &
+"/home/squashfs-root/AppRun"
