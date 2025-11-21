@@ -54,6 +54,17 @@ export default class Converter {
                 const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/"`, `"${uniqueId}"`];
 
                 execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
+                    helperSrc.fileOrFolderRemove(input, (resultFileRemove) => {
+                        if (typeof resultFileRemove !== "boolean") {
+                            helperSrc.writeLog(
+                                "Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove(input)",
+                                resultFileRemove.toString()
+                            );
+
+                            helperSrc.responseBody("", resultFileRemove.toString(), response, 500);
+                        }
+                    });
+
                     if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
                         helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`, (resultFileReadStream) => {
                             if (Buffer.isBuffer(resultFileReadStream)) {
