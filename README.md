@@ -8,7 +8,7 @@ It's possible to use a personal certificate instead of "Ms_cronjob", just add th
 ## Info:
 
 -   Cross platform (Windows, Linux)
--   X11 for WSL2 (Run linux GUI app directly in windows).
+-   WSLg for WSL2 (Run linux GUI app directly in windows).
 -   Libre office
 
 ## Installation

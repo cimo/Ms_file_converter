@@ -116,13 +116,13 @@ export default class Server {
             this.app.get("/login", this.limiter, (_request: Request, response: Response) => {
                 Ca.writeCookie(`${helperSrc.LABEL}_authentication`, response);
 
-                helperSrc.responseBody("Login.", "", response, 200);
+                helperSrc.responseBody("ok", "", response, 200);
             });
 
             this.app.get("/logout", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
                 Ca.removeCookie(`${helperSrc.LABEL}_authentication`, request, response);
 
-                helperSrc.responseBody("Logout.", "", response, 200);
+                helperSrc.responseBody("ok", "", response, 200);
             });
         });
     };
