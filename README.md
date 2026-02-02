@@ -8,7 +8,7 @@ It's possible to use a personal certificate instead of "Ms_cronjob", just add th
 ## Info:
 
 -   Cross platform (Windows, Linux)
--   WSLg for WSL2 (Run linux GUI app directly in windows).
+-   WSLg for WSL2 (Run linux GUI app directly in windows) with full nvidia GPU host support.
 -   Libre office
 
 ## Installation
@@ -25,14 +25,23 @@ bash docker/container_execute.sh "local" "build-up"
 bash docker/container_execute.sh "local" "up"
 ```
 
+## GPU
+
+1. When the container start, a message appears that indicates the GPU status:
+
+NVIDIA GeForce RTX 3060 - (Host GPU available)
+
 ## Reset
 
 1. Remove this from the root:
 
     - .cache
     - .config
-    - .dbus
+    - .local
     - .npm
+    - .nv
+    - .pki
+    - dist
     - node_modules
     - package-lock.json
 

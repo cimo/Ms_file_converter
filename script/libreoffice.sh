@@ -1,7 +1,3 @@
 #!/bin/bash
 
-eval "$(dbus-launch --auto-syntax)"
-
-export NO_AT_BRIDGE=1
-
-"/home/squashfs-root/AppRun"
+XDG_RUNTIME_DIR="/mnt/wslg/runtime-dir" "/home/squashfs-root/AppRun" >> "${PATH_ROOT}${MS_FC_PATH_LOG}libreoffice.log" 2>&1 &
