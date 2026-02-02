@@ -101,9 +101,9 @@ CMD \
     # Command
     command -v nvidia-smi > /dev/null && nvidia-smi --query-gpu=name --format=csv,noheader || echo "Host without nvidia GPU support." \
     # Dbus
-    bash ${PATH_ROOT}script/dbus.sh \
+    && bash ${PATH_ROOT}script/dbus.sh \
     # Npm
-    rm -rf ${PATH_ROOT}node_modules/ ${PATH_ROOT}package-lock.json \
+    && rm -rf ${PATH_ROOT}node_modules/ ${PATH_ROOT}package-lock.json \
     && npm install \
     && npm run execute
 

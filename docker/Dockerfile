@@ -110,8 +110,8 @@ CMD \
     # Command
     command -v nvidia-smi > /dev/null && nvidia-smi --query-gpu=name --format=csv,noheader || echo "Host without nvidia GPU support." \
     # Dbus
-    bash ${PATH_ROOT}script/dbus.sh \
+    && bash ${PATH_ROOT}script/dbus.sh \
     # Node
-    node ${PATH_ROOT}dist/src/controller/Server.js
+    && node ${PATH_ROOT}dist/src/controller/Server.js
 
 EXPOSE ${SERVER_PORT}
