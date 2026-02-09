@@ -23,11 +23,12 @@ pnpm-debug.log*
 # cimo +
 .cache
 .config
-.dbus
+.local
 .ms_cronjob-volume/**/*
 !.ms_cronjob-volume/**/
 !.ms_cronjob-volume/**/.gitkeep
 .npm
+.pki
 dist
 file/input/*
 !file/input/.gitkeep

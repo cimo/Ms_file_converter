@@ -99,7 +99,7 @@ export default class Server {
             const controllerConverter = new ControllerConverter(this.app, this.limiter);
             controllerConverter.api();
 
-            helperSrc.writeLog("Server.ts - createServer() - listen()", `Port: ${helperSrc.SERVER_PORT}`);
+            helperSrc.writeLog("Server.ts - createServer() - listen() - Port", helperSrc.SERVER_PORT);
 
             this.app.get("/", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
                 if (request.accepts("html")) {

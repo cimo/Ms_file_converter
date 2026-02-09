@@ -2,8 +2,8 @@
 
 Microservice file converter.
 
-Depend from "Ms_cronjob" (use "ms_cronjob-volume" for share the certificate).
-It's possible to use a personal certificate instead of "Ms_cronjob", just add the certificate in the ".ms_cronjob-volume" folders.
+Depend on "Ms_cronjob" (use "ms_cronjob-volume" to share the certificate).
+It's possible to use a personal certificate instead of "Ms_cronjob", just add the certificate to the ".ms_cronjob-volume" folder.
 
 ## Info:
 
@@ -25,12 +25,6 @@ bash docker/container_execute.sh "local" "build-up"
 bash docker/container_execute.sh "local" "up"
 ```
 
-## GPU
-
-1. When the container start, a message appears that indicates the GPU status:
-
-NVIDIA GeForce RTX 3060 - (Host GPU available)
-
 ## Reset
 
 1. Remove this from the root:
@@ -38,8 +32,8 @@ NVIDIA GeForce RTX 3060 - (Host GPU available)
     - .cache
     - .config
     - .local
+    - .ms_cronjob-volume/certificate
     - .npm
-    - .nv
     - .pki
     - dist
     - node_modules
