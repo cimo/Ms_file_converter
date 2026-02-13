@@ -3,7 +3,8 @@
 Microservice file converter.
 
 Depend on "Ms_cronjob" (use "ms_cronjob-volume" to share the certificate).
-It's possible to use a personal certificate instead of "Ms_cronjob", just add the certificate to the ".ms_cronjob-volume" folder.
+
+It's possible to use a custom certificate instead of "Ms_cronjob", just add it to the ".ms_cronjob-volume/certificate" folder before build the container.
 
 ## Info:
 
@@ -41,7 +42,9 @@ bash docker/container_execute.sh "local" "up"
 
 2. Follow the "Installation" instructions.
 
-3. For execute "Libre office" GUI write on terminal:
+## Command
+
+1. For execute "Libre office" GUI write on terminal:
 
     ```
     bash script/libreoffice.sh
