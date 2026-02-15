@@ -2,11 +2,6 @@
 
 pathOutput="${PATH_ROOT}${MS_FC_PATH_FILE}output/"
 
-if [ -z "${PATH_ROOT}" ]
-then
-    exit 1
-fi
-
 currentTime=$(date +%s)
 
 for data in "${pathOutput}"*/
