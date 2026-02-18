@@ -15,22 +15,6 @@ export default class Converter {
     private controllerUpload: ControllerUpload;
 
     // Method
-    constructor(app: Express.Express, limiter: RateLimitRequestHandler) {
-        this.app = app;
-        this.limiter = limiter;
-        this.controllerUpload = new ControllerUpload();
-    }
-
-    api = (): void => {
-        this.app.post("/api/toPdf", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
-            this.execute("pdf", request, response);
-        });
-
-        this.app.post("/api/toJpg", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
-            this.execute("jpg", request, response);
-        });
-    };
-
     private execute = (mode: string, request: Request, response: Response) => {
         this.controllerUpload
             .execute(request, true)
@@ -88,7 +72,23 @@ export default class Converter {
             .catch((error: Error) => {
                 helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error);
 
-                helperSrc.responseBody("", error, response, 500);
+                helperSrc.responseBody("", "ko", response, 500);
             });
+    };
+
+    constructor(app: Express.Express, limiter: RateLimitRequestHandler) {
+        this.app = app;
+        this.limiter = limiter;
+        this.controllerUpload = new ControllerUpload();
+    }
+
+    api = (): void => {
+        this.app.post("/api/toPdf", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
+            this.execute("pdf", request, response);
+        });
+
+        this.app.post("/api/toJpg", this.limiter, Ca.authenticationMiddleware, (request: Request, response: Response) => {
+            this.execute("jpg", request, response);
+        });
     };
 }

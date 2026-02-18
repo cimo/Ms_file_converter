@@ -78,7 +78,7 @@ export default class Upload {
                 }
             });
 
-            request.on("error", (error: Error) => {
+            request.on("error", (error) => {
                 reject(error);
 
                 return;
