@@ -70,7 +70,7 @@ export default class Converter {
                 });
             })
             .catch((error: Error) => {
-                helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error);
+                helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error.message);
 
                 helperSrc.responseBody("", "ko", response, 500);
             });
