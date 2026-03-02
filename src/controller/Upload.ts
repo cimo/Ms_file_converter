@@ -61,36 +61,24 @@ export default class Upload {
                             if (isFileExists) {
                                 Fs.access(input, Fs.constants.F_OK, (error) => {
                                     if (!error) {
-                                        reject("File exists.");
-
-                                        return;
-                                    } else {
-                                        helperSrc.fileWriteStream(input, formData.buffer, (resultFileWriteStream) => {
-                                            if (resultFileWriteStream) {
-                                                resolve(formDataList);
-
-                                                return;
-                                            } else {
-                                                reject(resultFileWriteStream);
-
-                                                return;
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                helperSrc.fileWriteStream(input, formData.buffer, (resultFileWriteStream) => {
-                                    if (resultFileWriteStream) {
-                                        resolve(formDataList);
-
-                                        return;
-                                    } else {
-                                        reject(resultFileWriteStream);
+                                        reject(new Error("File exists."));
 
                                         return;
                                     }
                                 });
                             }
+
+                            helperSrc.fileWriteStream(input, formData.buffer, (resultFileWriteStream) => {
+                                if (typeof resultFileWriteStream === "boolean" && resultFileWriteStream) {
+                                    resolve(formDataList);
+
+                                    return;
+                                } else {
+                                    reject(new Error("File write failed."));
+
+                                    return;
+                                }
+                            });
 
                             break;
                         }
