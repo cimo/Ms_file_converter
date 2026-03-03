@@ -5,7 +5,7 @@ p2=$(printf '%s' "${2}" | xargs)
 p3=$(printf '%s' "${3}" | xargs)
 p4=$(printf '%s' "${4}" | xargs)
 
-if [ -z "${p1}" ] || [ -z "${p2}" ] || [ -z "${p3}" ] || [ -z "${p4}" ]
+if [ "$#" -lt 4 ]
 then
     echo "command1.sh - Missing parameter."
 

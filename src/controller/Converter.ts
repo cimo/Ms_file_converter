@@ -41,7 +41,7 @@ export default class Converter {
                     helperSrc.fileOrFolderRemove(input, (resultFileRemove) => {
                         if (typeof resultFileRemove !== "boolean") {
                             helperSrc.writeLog(
-                                "Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove(input)",
+                                "Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderRemove()",
                                 resultFileRemove.toString()
                             );
 
