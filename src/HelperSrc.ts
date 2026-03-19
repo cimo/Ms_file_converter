@@ -29,6 +29,9 @@ export const PATH_PUBLIC = Ce.checkVariable("MS_FC_PATH_PUBLIC");
 export const PATH_SCRIPT = Ce.checkVariable("MS_FC_PATH_SCRIPT");
 export const MIME_TYPE = Ce.checkVariable("MS_FC_MIME_TYPE") || (process.env["MS_FC_MIME_TYPE"] as string);
 export const FILE_SIZE_MB = Ce.checkVariable("MS_FC_FILE_SIZE_MB") || (process.env["MS_FC_FILE_SIZE_MB"] as string);
+export const PERSISTENCE_SECOND = Ce.checkVariable("MS_FC_PERSISTENCE_SECOND") || (process.env["MS_FC_PERSISTENCE_SECOND"] as string);
+
+Ce.loadFile(`./env/${ENV_NAME}.secret.env`);
 
 export const localeConfiguration: Record<string, { locale: string; currency: string; dateFormat: string }> = {
     // Asia
