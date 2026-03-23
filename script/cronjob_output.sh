@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 path="${PATH_ROOT}${MS_FC_PATH_FILE}output/"
 
 currentTime=$(date +%s)
