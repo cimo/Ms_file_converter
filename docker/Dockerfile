@@ -98,6 +98,7 @@ RUN cd ~ \
     libwayland-egl1 \
     libwayland-cursor0 \
     libgomp1 \
+    libatomic1 \
     xdg-utils \
     # Libre office
     && apt-get update && apt-get install -y \
