@@ -101,7 +101,7 @@ export default class Upload {
                 }
             });
 
-            request.on("error", (error) => {
+            request.on("error", (error: Error) => {
                 helperSrc.writeLog("Upload.ts - execute() - request.on() - Error", error.message);
 
                 reject(new Error(error.message));
