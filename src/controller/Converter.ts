@@ -34,10 +34,10 @@ export default class Converter {
                 const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileName}`;
                 const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
-                const execCommand = `. ${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
-                const execArgumentList = [`"${mode}"`, `"${input}"`, `"${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/"`, `"${uniqueId}"`];
+                const execCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
+                const execArgumentList = [execCommand, mode, input, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/`, uniqueId];
 
-                execFile(execCommand, execArgumentList, { shell: "/bin/bash", encoding: "utf8" }, (_, stdout, stderr) => {
+                execFile("/bin/bash", execArgumentList, { encoding: "utf8" }, (error, stdout, stderr) => {
                     helperSrc.fileOrFolderDelete(input, (resultFileDelete) => {
                         if (typeof resultFileDelete !== "boolean") {
                             helperSrc.writeLog(
@@ -48,6 +48,14 @@ export default class Converter {
                             helperSrc.responseBody("", resultFileDelete.toString(), response, 500);
                         }
                     });
+
+                    if (error) {
+                        helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - error`, error.message);
+
+                        helperSrc.responseBody("", error.message, response, 500);
+
+                        return;
+                    }
 
                     if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
                         helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`, (resultFileReadStream) => {
