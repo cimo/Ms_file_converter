@@ -109,7 +109,7 @@ RUN cd ~ \
     libssl3 \
     libxslt1.1 \
     libcups2 \
-    && curl -fsSL "https://appimages.libreitalia.org/LibreOffice-still.basic-x86_64.AppImage" -o "/home/libreoffice.AppImage" \
+    && curl -fsSL https://appimages.libreitalia.org/LibreOffice-still.basic-x86_64.AppImage -o /home/libreoffice.AppImage \
     && cd /home/ \
     && chmod +x /home/libreoffice.AppImage \
     && /home/libreoffice.AppImage --appimage-extract \
