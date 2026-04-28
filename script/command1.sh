@@ -20,4 +20,4 @@ parameter4="${4}"
 exec 9>"/tmp/libreoffice.lock"
 flock 9
 
-"/home/squashfs-root/AppRun" --nologo --headless --convert-to "${parameter1}" "${parameter2}" --outdir "${parameter3}${parameter4}/" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+"/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${parameter1}" "${parameter2}" --outdir "${parameter3}${parameter4}/" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"

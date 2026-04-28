@@ -1,3 +1,3 @@
 #!/bin/bash
 
-"/home/squashfs-root/AppRun" --nologo >> "${PATH_ROOT}${MS_FC_PATH_LOG}libreoffice.log" 2>&1 &
+"/home/squashfs-root/AppRun" --norestore --nologo >> "${PATH_ROOT}${MS_FC_PATH_LOG}libreoffice.log" 2>&1 &
