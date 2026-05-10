@@ -38,17 +38,6 @@ export default class Converter {
                 const execArgumentList = [execCommand, mode, input, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/`, uniqueId];
 
                 execFile("/bin/bash", execArgumentList, { encoding: "utf8" }, (error, stdout, stderr) => {
-                    helperSrc.fileOrFolderDelete(input, (resultFileDelete) => {
-                        if (typeof resultFileDelete !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete()`,
-                                resultFileDelete.toString()
-                            );
-
-                            helperSrc.responseBody("", resultFileDelete.toString(), response, 500);
-                        }
-                    });
-
                     if (error) {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - error`, error.message);
 
@@ -75,6 +64,15 @@ export default class Converter {
 
                         helperSrc.responseBody("", stderr, response, 500);
                     }
+
+                    helperSrc.fileOrFolderDelete(input, (resultFileDelete) => {
+                        if (typeof resultFileDelete !== "boolean") {
+                            helperSrc.writeLog(
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete()`,
+                                resultFileDelete.toString()
+                            );
+                        }
+                    });
                 });
             })
             .catch((error: Error) => {

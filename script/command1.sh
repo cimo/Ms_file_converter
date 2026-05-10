@@ -7,7 +7,7 @@ p4=$(printf '%s' "${4}" | xargs)
 
 if [ "$#" -lt 4 ]
 then
-    echo "command1.sh - Missing parameter."
+    echo -e "\n❌ command1.sh - Missing parameter."
 
     exit 1
 fi
