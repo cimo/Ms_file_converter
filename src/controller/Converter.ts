@@ -68,7 +68,16 @@ export default class Converter {
                     helperSrc.fileOrFolderDelete(input, (resultFileDelete) => {
                         if (typeof resultFileDelete !== "boolean") {
                             helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete()`,
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete(input)`,
+                                resultFileDelete.toString()
+                            );
+                        }
+                    });
+
+                    helperSrc.fileOrFolderDelete(output, (resultFileDelete) => {
+                        if (typeof resultFileDelete !== "boolean") {
+                            helperSrc.writeLog(
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete(output)`,
                                 resultFileDelete.toString()
                             );
                         }
