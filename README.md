@@ -25,7 +25,6 @@ bash docker/container_execute.sh "local" "up"
 ## Reset
 1. Delete this from the root:
     - .cache
-    - .config
     - .local
     - .npm
     - .pki
