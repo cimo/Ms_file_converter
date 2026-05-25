@@ -17,7 +17,7 @@ export default class Converter {
     // Method
     private execute = (mode: string, request: Request, response: Response) => {
         this.controllerUpload
-            .execute(request, true)
+            .execute(request, true, false, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/`)
             .then((resultControllerUploadList) => {
                 let fileName = "";
 
