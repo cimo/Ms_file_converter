@@ -31,7 +31,9 @@ export default class Converter {
 
                 const uniqueId = helperSrc.generateUniqueId();
 
-                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileName}`;
+                const baseFileName = helperSrc.baseFileName(fileName);
+                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${baseFileName}/${fileName}`;
+                const inputFolder = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${baseFileName}/`;
                 const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
                 const execCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
@@ -65,10 +67,10 @@ export default class Converter {
                         helperSrc.responseBody("", stderr, response, 500);
                     }
 
-                    helperSrc.fileOrFolderDelete(input, (resultFileDelete) => {
+                    helperSrc.fileOrFolderDelete(inputFolder, (resultFileDelete) => {
                         if (typeof resultFileDelete !== "boolean") {
                             helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete(input)`,
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete(inputFolder)`,
                                 resultFileDelete.toString()
                             );
                         }
