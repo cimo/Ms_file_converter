@@ -21,7 +21,9 @@ export default class Converter {
             .then((resultControllerUploadList) => {
                 let fileName = "";
 
-                for (const resultControllerUpload of resultControllerUploadList) {
+                for (let a = 0; a < resultControllerUploadList.length; a++) {
+                    const resultControllerUpload = resultControllerUploadList[a];
+
                     if (resultControllerUpload.name === "file" && resultControllerUpload.fileName) {
                         fileName = resultControllerUpload.fileName;
 
@@ -29,11 +31,11 @@ export default class Converter {
                     }
                 }
 
-                const uniqueId = helperSrc.generateUniqueId();
+                const fileDetail = helperSrc.fileDetail(fileName);
 
-                const baseFileName = helperSrc.baseFileName(fileName);
-                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${baseFileName}/${fileName}`;
-                const inputFolder = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${baseFileName}/`;
+                const uniqueId = helperSrc.generateUniqueId();
+                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.fileName}`;
+                const inputFolder = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;
                 const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
                 const execCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
