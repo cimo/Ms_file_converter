@@ -1,7 +1,6 @@
 import Express, { Request, Response } from "express";
 import { RateLimitRequestHandler } from "express-rate-limit";
 import Path from "path";
-import { execFile } from "child_process";
 import { Ca } from "@cimo/authentication/dist/src/Main.js";
 
 // Source
@@ -41,52 +40,57 @@ export default class Converter {
                 const execCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
                 const execArgumentList = [execCommand, mode, input, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/`, uniqueId];
 
-                execFile("/bin/bash", execArgumentList, { encoding: "utf8" }, (error, stdout, stderr) => {
-                    if (error) {
-                        helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - error`, error.message);
+                helperSrc
+                    .executionFile(execArgumentList)
+                    .then((result) => {
+                        if (result.error) {
+                            helperSrc.writeLog(
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`,
+                                result.error.message
+                            );
 
-                        helperSrc.responseBody("", error.message, response, 500);
+                            helperSrc.responseBody("", result.error.message, response, 500);
 
-                        return;
-                    }
+                            return;
+                        }
 
-                    if ((stdout !== "" && stderr === "") || (stdout !== "" && stderr !== "")) {
-                        helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`, (resultFileReadStream) => {
-                            if (Buffer.isBuffer(resultFileReadStream)) {
-                                helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
-                            } else {
+                        if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
+                            helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`, (resultFileReadStream) => {
+                                if (Buffer.isBuffer(resultFileReadStream)) {
+                                    helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
+                                } else {
+                                    helperSrc.writeLog(
+                                        `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
+                                        resultFileReadStream.toString()
+                                    );
+
+                                    helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
+                                }
+                            });
+                        } else if (result.stdout === "" && result.stderr !== "") {
+                            helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
+
+                            helperSrc.responseBody("", result.stderr, response, 500);
+                        }
+
+                        helperSrc.fileOrFolderDelete(inputFolder, (resultFileDelete) => {
+                            if (typeof resultFileDelete !== "boolean") {
                                 helperSrc.writeLog(
-                                    `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileReadStream()`,
-                                    resultFileReadStream.toString()
+                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(inputFolder)`,
+                                    resultFileDelete.toString()
                                 );
-
-                                helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
                             }
                         });
-                    } else if (stdout === "" && stderr !== "") {
-                        helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - stderr`, stderr);
 
-                        helperSrc.responseBody("", stderr, response, 500);
-                    }
-
-                    helperSrc.fileOrFolderDelete(inputFolder, (resultFileDelete) => {
-                        if (typeof resultFileDelete !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete(inputFolder)`,
-                                resultFileDelete.toString()
-                            );
-                        }
+                        helperSrc.fileOrFolderDelete(output, (resultFileDelete) => {
+                            if (typeof resultFileDelete !== "boolean") {
+                                helperSrc.writeLog(
+                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(output)`,
+                                    resultFileDelete.toString()
+                                );
+                            }
+                        });
                     });
-
-                    helperSrc.fileOrFolderDelete(output, (resultFileDelete) => {
-                        if (typeof resultFileDelete !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - execFile() - fileOrFolderDelete(output)`,
-                                resultFileDelete.toString()
-                            );
-                        }
-                    });
-                });
             })
             .catch((error: Error) => {
                 helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error.message);
