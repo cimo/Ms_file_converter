@@ -40,51 +40,47 @@ export default class Converter {
                 const execCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
                 const execArgumentList = [execCommand, mode, input, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/`, uniqueId];
 
-                helperSrc.executionFile(execArgumentList).then((result) => {
+                helperSrc.executionFile(execArgumentList).then(async (result) => {
                     if (result.error) {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
 
                         helperSrc.responseBody("", result.error.message, response, 500);
+                    } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
+                        const resultFileReadStream = await helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`);
 
-                        return;
-                    }
+                        if (Buffer.isBuffer(resultFileReadStream)) {
+                            helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
+                        } else {
+                            helperSrc.writeLog(
+                                `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
+                                resultFileReadStream.toString()
+                            );
 
-                    if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
-                        helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`, (resultFileReadStream) => {
-                            if (Buffer.isBuffer(resultFileReadStream)) {
-                                helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
-                            } else {
-                                helperSrc.writeLog(
-                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
-                                    resultFileReadStream.toString()
-                                );
-
-                                helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
-                            }
-                        });
+                            helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
+                        }
                     } else if (result.stdout === "" && result.stderr !== "") {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
 
                         helperSrc.responseBody("", result.stderr, response, 500);
                     }
 
-                    helperSrc.fileOrFolderDelete(inputFolder, (resultFileDelete) => {
-                        if (typeof resultFileDelete !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(inputFolder)`,
-                                resultFileDelete.toString()
-                            );
-                        }
-                    });
+                    const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(inputFolder);
 
-                    helperSrc.fileOrFolderDelete(output, (resultFileDelete) => {
-                        if (typeof resultFileDelete !== "boolean") {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(output)`,
-                                resultFileDelete.toString()
-                            );
-                        }
-                    });
+                    if (typeof fileOrFolderDeleteInput !== "boolean") {
+                        helperSrc.writeLog(
+                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(inputFolder)`,
+                            fileOrFolderDeleteInput.toString()
+                        );
+                    }
+
+                    const fileOrFolderDeleteOutput = await helperSrc.fileOrFolderDelete(output);
+
+                    if (typeof fileOrFolderDeleteOutput !== "boolean") {
+                        helperSrc.writeLog(
+                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(output)`,
+                            fileOrFolderDeleteOutput.toString()
+                        );
+                    }
                 });
             })
             .catch((error: Error) => {
