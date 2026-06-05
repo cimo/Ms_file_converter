@@ -44,7 +44,7 @@ export default class Converter {
                     if (result.error) {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
 
-                        helperSrc.responseBody("", result.error.message, response, 500);
+                        helperSrc.responseBody("", "ko", response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
                         const resultFileReadStream = await helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`);
 
@@ -56,12 +56,12 @@ export default class Converter {
                                 resultFileReadStream.toString()
                             );
 
-                            helperSrc.responseBody("", resultFileReadStream.toString(), response, 500);
+                            helperSrc.responseBody("", "ko", response, 500);
                         }
                     } else if (result.stdout === "" && result.stderr !== "") {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
 
-                        helperSrc.responseBody("", result.stderr, response, 500);
+                        helperSrc.responseBody("", "ko", response, 500);
                     }
 
                     const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(inputFolder);
