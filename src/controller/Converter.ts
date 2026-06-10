@@ -46,14 +46,14 @@ export default class Converter {
 
                         helperSrc.responseBody("", "ko", response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
-                        const resultFileReadStream = await helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`);
+                        const fileReadStream = await helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`);
 
-                        if (Buffer.isBuffer(resultFileReadStream)) {
-                            helperSrc.responseBody(resultFileReadStream.toString("base64"), "", response, 200);
+                        if (Buffer.isBuffer(fileReadStream)) {
+                            helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
                         } else {
                             helperSrc.writeLog(
                                 `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
-                                resultFileReadStream.toString()
+                                fileReadStream.toString()
                             );
 
                             helperSrc.responseBody("", "ko", response, 500);
