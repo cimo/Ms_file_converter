@@ -33,20 +33,26 @@ export default class Converter {
                 const fileDetail = helperSrc.fileDetail(fileName);
 
                 const uniqueId = helperSrc.generateUniqueId();
-                const input = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.fileName}`;
-                const inputFolder = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;
-                const output = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
+                const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.fileName}`;
+                const pathInputFolder = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;
+                const pathOutput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
-                const execCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
-                const execArgumentList = [execCommand, mode, input, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/`, uniqueId];
+                const pathExecutionCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
+                const executionArgumentList = [
+                    pathExecutionCommand,
+                    mode,
+                    pathInput,
+                    `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/`,
+                    uniqueId
+                ];
 
-                helperSrc.executionFile(execArgumentList).then(async (result) => {
+                helperSrc.executionFile(executionArgumentList).then(async (result) => {
                     if (result.error) {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
 
                         helperSrc.responseBody("", "ko", response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
-                        const fileReadStream = await helperSrc.fileReadStream(`${output}${Path.parse(fileName).name}.${mode}`);
+                        const fileReadStream = await helperSrc.fileReadStream(`${pathOutput}${Path.parse(fileName).name}.${mode}`);
 
                         if (Buffer.isBuffer(fileReadStream)) {
                             helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
@@ -64,20 +70,20 @@ export default class Converter {
                         helperSrc.responseBody("", "ko", response, 500);
                     }
 
-                    const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(inputFolder);
+                    const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(pathInputFolder);
 
                     if (typeof fileOrFolderDeleteInput !== "boolean") {
                         helperSrc.writeLog(
-                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(inputFolder)`,
+                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete()`,
                             fileOrFolderDeleteInput.toString()
                         );
                     }
 
-                    const fileOrFolderDeleteOutput = await helperSrc.fileOrFolderDelete(output);
+                    const fileOrFolderDeleteOutput = await helperSrc.fileOrFolderDelete(pathOutput);
 
                     if (typeof fileOrFolderDeleteOutput !== "boolean") {
                         helperSrc.writeLog(
-                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete(output)`,
+                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete()`,
                             fileOrFolderDeleteOutput.toString()
                         );
                     }
