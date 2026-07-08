@@ -112,6 +112,9 @@ RUN cd ~ \
     && /home/libreoffice.AppImage --appimage-extract \
     && chown -R node:node /home/squashfs-root/ \
     && cd ~ \
+    # Pdf
+    && apt-get update && apt-get install -y \
+    poppler-utils \
     # Clean
     && apt-get remove --purge -y sudo \
     && rm -rf /var/lib/apt/lists/* \

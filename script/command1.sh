@@ -17,4 +17,26 @@ parameter2="${2}"
 parameter3="${3}"
 parameter4="${4}"
 
-"/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${parameter1}" "${parameter2}" --outdir "${parameter3}${parameter4}/" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+pathOutput="${parameter3}${parameter4}/"
+
+extension="${parameter2##*.}"
+basename=$(basename "${parameter2%.*}")
+
+if [ "${parameter1}" = "pdf" ]
+then
+    "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "pdf" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+elif [ "${parameter1}" = "jpg" ]
+then
+    if [ "${extension}" == "pdf" ]
+    then
+        mkdir -p "${pathOutput}"
+
+        cp "${parameter2}" "${pathOutput}${basename}.pdf"
+
+        echo "Copy pdf" | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+    else
+        "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "pdf" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+    fi
+
+    pdftoppm -jpeg -r 300 "${pathOutput}${basename}.pdf" "${pathOutput}${basename}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+fi

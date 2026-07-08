@@ -34,7 +34,7 @@ export default class Converter {
 
                 const uniqueId = helperSrc.generateUniqueId();
                 const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.fileName}`;
-                const pathInputFolder = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;
+                const pathInputBasename = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;
                 const pathOutput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
                 const pathExecutionCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
@@ -52,17 +52,44 @@ export default class Converter {
 
                         helperSrc.responseBody("", "ko", response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
-                        const fileReadStream = await helperSrc.fileReadStream(`${pathOutput}${Path.parse(fileName).name}.${mode}`);
+                        if (mode === "pdf") {
+                            const fileReadStream = await helperSrc.fileReadStream(`${pathOutput}${Path.parse(fileName).name}.${mode}`);
 
-                        if (Buffer.isBuffer(fileReadStream)) {
-                            helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
-                        } else {
-                            helperSrc.writeLog(
-                                `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
-                                fileReadStream.toString()
-                            );
+                            if (Buffer.isBuffer(fileReadStream)) {
+                                helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
+                            } else {
+                                helperSrc.writeLog(
+                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
+                                    fileReadStream.toString()
+                                );
 
-                            helperSrc.responseBody("", "ko", response, 500);
+                                helperSrc.responseBody("", "ko", response, 500);
+                            }
+                        } else if (mode === "jpg") {
+                            const pathPageList = await helperSrc.findInDirectoryRecursive(pathOutput, ".jpg");
+
+                            pathPageList.sort((left, right) => parseInt(Path.parse(left).name, 10) - parseInt(Path.parse(right).name, 10));
+
+                            const base64List: string[] = [];
+
+                            for (let a = 0; a < pathPageList.length; a++) {
+                                const fileReadStream = await helperSrc.fileReadStream(pathPageList[a]);
+
+                                if (Buffer.isBuffer(fileReadStream)) {
+                                    base64List.push(fileReadStream.toString("base64"));
+                                }
+                            }
+
+                            if (base64List.length > 0 && base64List.length === pathPageList.length) {
+                                helperSrc.responseBody(JSON.stringify(base64List), "", response, 200);
+                            } else {
+                                helperSrc.writeLog(
+                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
+                                    `${base64List.length}/${pathPageList.length}`
+                                );
+
+                                helperSrc.responseBody("", "ko", response, 500);
+                            }
                         }
                     } else if (result.stdout === "" && result.stderr !== "") {
                         helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
@@ -70,7 +97,7 @@ export default class Converter {
                         helperSrc.responseBody("", "ko", response, 500);
                     }
 
-                    const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(pathInputFolder);
+                    const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(pathInputBasename);
 
                     if (typeof fileOrFolderDeleteInput !== "boolean") {
                         helperSrc.writeLog(
