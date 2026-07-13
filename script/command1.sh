@@ -22,9 +22,16 @@ pathOutput="${parameter3}${parameter4}/"
 extension="${parameter2##*.}"
 basename=$(basename "${parameter2%.*}")
 
+filterPdf="pdf"
+
+if [ "${extension}" = "xlsx" ]
+then
+    filterPdf='pdf:calc_pdf_Export:{"SinglePageSheets":{"type":"boolean","value":"true"}}'
+fi
+
 if [ "${parameter1}" = "pdf" ]
 then
-    "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "pdf" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+    "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
 elif [ "${parameter1}" = "jpg" ]
 then
     if [ "${extension}" == "pdf" ]
@@ -35,7 +42,7 @@ then
 
         echo "Copy pdf" | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
     else
-        "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "pdf" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+        "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
     fi
 
     pdftoppm -jpeg -r 300 "${pathOutput}${basename}.pdf" "${pathOutput}${basename}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"

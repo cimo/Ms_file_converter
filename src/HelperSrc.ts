@@ -1,5 +1,6 @@
 import Fs from /* webpackIgnore: true */ "fs";
 import Path from /* webpackIgnore: true */ "path";
+import AdmZip from /* webpackIgnore: true */ "adm-zip";
 import { exec, execFile, ChildProcess } from /* webpackIgnore: true */ "child_process";
 import { Request, Response } from /* webpackIgnore: true */ "express";
 import { Ce } from "@cimo/environment/dist/src/Main.js";
@@ -632,4 +633,35 @@ export const responseBody = (stdoutValue: string, stderrValue: string | Error, r
 };
 
 // Custom
+export const xlsxViewReset = (filePath: string): boolean => {
+    const zipObject = new AdmZip(filePath);
+    const entryList = zipObject.getEntries();
+
+    let isModified = false;
+
+    for (let a = 0; a < entryList.length; a++) {
+        const entry = entryList[a];
+
+        if (entry.entryName.startsWith("xl/worksheets/") && entry.entryName.endsWith(".xml")) {
+            const content = entry.getData().toString("utf8");
+            const contentNew = content.replace(/(<sheetView[^>]*?)\s+topLeftCell="[^"]*"/g, "$1");
+
+            if (contentNew !== content) {
+                zipObject.updateFile(entry.entryName, Buffer.from(contentNew, "utf8"));
+
+                isModified = true;
+            }
+        }
+    }
+
+    if (isModified) {
+        for (let a = 0; a < entryList.length; a++) {
+            entryList[a].header.flags = entryList[a].header.flags & ~8;
+        }
+
+        zipObject.writeZip(filePath);
+    }
+
+    return isModified;
+};
 // Custom
