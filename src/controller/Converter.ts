@@ -33,6 +33,7 @@ export default class Converter {
                 const fileDetail = helperSrc.fileDetail(fileName);
 
                 const uniqueId = helperSrc.generateUniqueId();
+
                 const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.fileName}`;
 
                 if (fileDetail.extension === "xlsx") {
