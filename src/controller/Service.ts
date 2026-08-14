@@ -7,7 +7,7 @@ import { Ca } from "@cimo/authentication/dist/src/Main.js";
 import * as helperSrc from "../HelperSrc.js";
 import ControllerUpload from "./Upload.js";
 
-export default class Converter {
+export default class Service {
     // Variable
     private app: Express.Express;
     private limiter: RateLimitRequestHandler;
@@ -54,22 +54,26 @@ export default class Converter {
 
                 helperSrc.executionFile(executionArgumentList).then(async (result) => {
                     if (result.error) {
-                        helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
+                        helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
+
+                        helperSrc.responseBody("", "ko", response, 500);
+                    } else if (result.stdout === "" && result.stderr !== "") {
+                        helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
 
                         helperSrc.responseBody("", "ko", response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
                         if (mode === "pdf") {
                             const fileReadStream = await helperSrc.fileReadStream(`${pathOutput}${Path.parse(fileName).name}.${mode}`);
 
-                            if (Buffer.isBuffer(fileReadStream)) {
-                                helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
-                            } else {
+                            if (!Buffer.isBuffer(fileReadStream)) {
                                 helperSrc.writeLog(
-                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
+                                    `Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
                                     fileReadStream.toString()
                                 );
 
                                 helperSrc.responseBody("", "ko", response, 500);
+                            } else {
+                                helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
                             }
                         } else if (mode === "jpg") {
                             const pathPageList = await helperSrc.findInDirectoryRecursive(pathOutput, ".jpg");
@@ -86,28 +90,24 @@ export default class Converter {
                                 }
                             }
 
-                            if (base64List.length > 0 && base64List.length === pathPageList.length) {
-                                helperSrc.responseBody(JSON.stringify(base64List), "", response, 200);
-                            } else {
+                            if (base64List.length === 0 || base64List.length !== pathPageList.length) {
                                 helperSrc.writeLog(
-                                    `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
+                                    `Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileReadStream()`,
                                     `${base64List.length}/${pathPageList.length}`
                                 );
 
                                 helperSrc.responseBody("", "ko", response, 500);
+                            } else {
+                                helperSrc.responseBody(JSON.stringify(base64List), "", response, 200);
                             }
                         }
-                    } else if (result.stdout === "" && result.stderr !== "") {
-                        helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
-
-                        helperSrc.responseBody("", "ko", response, 500);
                     }
 
                     const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(pathInputBasename);
 
                     if (typeof fileOrFolderDeleteInput !== "boolean") {
                         helperSrc.writeLog(
-                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete()`,
+                            `Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete()`,
                             fileOrFolderDeleteInput.toString()
                         );
                     }
@@ -116,14 +116,14 @@ export default class Converter {
 
                     if (typeof fileOrFolderDeleteOutput !== "boolean") {
                         helperSrc.writeLog(
-                            `Converter.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete()`,
+                            `Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - fileOrFolderDelete()`,
                             fileOrFolderDeleteOutput.toString()
                         );
                     }
                 });
             })
             .catch((error: Error) => {
-                helperSrc.writeLog(`Converter.ts - api() - post(/api/${mode}) - execute() - catch()`, error.message);
+                helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - catch()`, error.message);
 
                 helperSrc.responseBody("", "ko", response, 500);
             });
