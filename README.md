@@ -12,12 +12,12 @@ Just add it to the "/certificate/custom/" folder and change the env variable bef
 - Libre office
 
 ## Installation
-1. For build and up write on terminal:
+1. For build and up write on host terminal:
 ```
 bash docker/container_execute.sh "local" "build-up"
 ```
 
-2. Just for up write on terminal:
+2. Just for up write on host terminal:
 ```
 bash docker/container_execute.sh "local" "up"
 ```
@@ -35,13 +35,7 @@ bash docker/container_execute.sh "local" "up"
 
 2. Follow the "Installation" instructions.
 
-## Command
-1. For execute "Libre office" GUI write on terminal:
-```
-bash script/libreoffice.sh
-```
-
-## Api (Postman)
+## Api
 1. Info
 ```
 url = https://localhost:1043/info
@@ -71,4 +65,10 @@ file            "upload field"
 ```
 url = https://localhost:1043/logout
 method = GET
+```
+
+## Gui
+1. For execute "Libre office" GUI write on container terminal:
+```
+bash script/libreoffice.sh
 ```
