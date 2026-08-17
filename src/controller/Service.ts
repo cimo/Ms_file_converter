@@ -76,7 +76,7 @@ export default class Service {
                                 helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
                             }
                         } else if (mode === "jpg") {
-                            const pathPageList = await helperSrc.findInDirectoryRecursive(pathOutput, ".jpg");
+                            const pathPageList = await helperSrc.findPathFileRecursive(pathOutput, ".jpg");
 
                             pathPageList.sort((left, right) => parseInt(Path.parse(left).name, 10) - parseInt(Path.parse(right).name, 10));
 
