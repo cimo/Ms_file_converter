@@ -34,7 +34,7 @@ then
     "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
 elif [ "${parameter1}" = "jpg" ]
 then
-    if [ "${extension}" == "pdf" ]
+    if [ "${extension}" = "pdf" ]
     then
         mkdir -p "${pathOutput}"
 
