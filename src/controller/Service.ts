@@ -17,7 +17,7 @@ export default class Service {
     private execute = (mode: string, request: Request, response: Response) => {
         this.controllerUpload
             .execute(request, true, false, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/`)
-            .then((resultControllerUploadList) => {
+            .then(async (resultControllerUploadList) => {
                 let fileName = "";
 
                 for (let a = 0; a < resultControllerUploadList.length; a++) {
@@ -30,7 +30,7 @@ export default class Service {
                     }
                 }
 
-                const fileDetail = helperSrc.fileDetail(fileName);
+                const fileDetail = await helperSrc.fileDetail(fileName);
 
                 const uniqueId = helperSrc.generateUniqueId();
 
