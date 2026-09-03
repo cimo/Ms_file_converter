@@ -37,7 +37,7 @@ export default class Service {
                 const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.name}`;
 
                 if (fileDetail.extension === "xlsx") {
-                    helperSrc.xlsxViewReset(pathInput);
+                    await helperSrc.xlsxViewReset(pathInput);
                 }
 
                 const pathInputBasename = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;

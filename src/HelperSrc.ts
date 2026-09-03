@@ -5,7 +5,7 @@ import { Ce } from "@cimo/environment/dist/src/Main.js";
 
 // Custom
 import { Request, Response } from /* webpackIgnore: true */ "express";
-import AdmZip from /* webpackIgnore: true */ "adm-zip";
+import { strFromU8, strToU8, unzip, zip, Unzipped } from /* webpackIgnore: true */ "fflate";
 // Custom
 
 // Source
@@ -807,35 +807,61 @@ export const responseBody = (actionOperation: modelHelperSrc.IactionOperation, r
     response.status(mode).send(responseBody);
 };
 
-export const xlsxViewReset = (filePath: string): boolean => {
-    const zipObject = new AdmZip(filePath);
-    const entryList = zipObject.getEntries();
+export const xlsxViewReset = (filePath: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+        Fs.readFile(filePath, (errorReadFile, readFileResult) => {
+            if (errorReadFile) {
+                resolve(false);
 
-    let isModified = false;
-
-    for (let a = 0; a < entryList.length; a++) {
-        const entry = entryList[a];
-
-        if (entry.entryName.startsWith("xl/worksheets/") && entry.entryName.endsWith(".xml")) {
-            const content = entry.getData().toString("utf8");
-            const contentNew = content.replace(/(<sheetView[^>]*?)\s+topLeftCell="[^"]*"/g, "$1");
-
-            if (contentNew !== content) {
-                zipObject.updateFile(entry.entryName, Buffer.from(contentNew, "utf8"));
-
-                isModified = true;
+                return;
             }
-        }
-    }
 
-    if (isModified) {
-        for (let a = 0; a < entryList.length; a++) {
-            entryList[a].header.flags = entryList[a].header.flags & ~8;
-        }
+            unzip(readFileResult, (errorUnzip: Error | null, entryObject: Unzipped) => {
+                if (errorUnzip) {
+                    resolve(false);
 
-        zipObject.writeZip(filePath);
-    }
+                    return;
+                }
 
-    return isModified;
+                let isModified = false;
+
+                for (const entryName of Object.keys(entryObject)) {
+                    if (entryName.startsWith("xl/worksheets/") && entryName.endsWith(".xml")) {
+                        const content = strFromU8(entryObject[entryName]);
+                        const contentNew = content.replace(/(<sheetView[^>]*?)\s+topLeftCell="[^"]*"/g, "$1");
+
+                        if (contentNew !== content) {
+                            entryObject[entryName] = strToU8(contentNew);
+                            isModified = true;
+                        }
+                    }
+                }
+
+                if (!isModified) {
+                    resolve(false);
+
+                    return;
+                }
+
+                zip(entryObject, (errorZip: Error | null, zipResult: Uint8Array) => {
+                    if (errorZip) {
+                        resolve(false);
+
+                        return;
+                    }
+
+                    Fs.writeFile(filePath, zipResult, (errorWriteFile) => {
+                        if (errorWriteFile) {
+                            resolve(false);
+
+                            return;
+                        }
+
+                        resolve(true);
+                    });
+                });
+            });
+        });
+    });
 };
 // Custom

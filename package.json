@@ -25,14 +25,13 @@
         "express-rate-limit": "8.6.2",
         "cookie-parser": "1.4.7",
         "cors": "2.8.6",
-        "adm-zip": "0.6.0"
+        "fflate": "0.8.3"
     },
     "devDependencies": {
         "@types/node": "25.3.0",
         "@types/express": "5.0.0",
         "@types/cookie-parser": "1.4.8",
         "@types/cors": "2.8.17",
-        "@types/adm-zip": "0.5.8",
         "@typescript-eslint/parser": "8.65.0",
         "@typescript-eslint/eslint-plugin": "8.65.0",
         "typescript": "5.7.2",
