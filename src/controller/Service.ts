@@ -56,11 +56,11 @@ export default class Service {
                     if (result.error) {
                         helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
 
-                        helperSrc.responseBody("", "ko", response, 500);
+                        helperSrc.responseBody({ state: "ko", message: result.error.message }, response, 500);
                     } else if (result.stdout === "" && result.stderr !== "") {
                         helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
 
-                        helperSrc.responseBody("", "ko", response, 500);
+                        helperSrc.responseBody({ state: "ko", message: result.stderr }, response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
                         if (mode === "pdf") {
                             const fileReadStream = await helperSrc.fileReadStream(`${pathOutput}${Path.parse(fileName).name}.${mode}`);
@@ -71,9 +71,9 @@ export default class Service {
                                     fileReadStream.toString()
                                 );
 
-                                helperSrc.responseBody("", "ko", response, 500);
+                                helperSrc.responseBody({ state: "ko", message: fileReadStream.toString() }, response, 500);
                             } else {
-                                helperSrc.responseBody(fileReadStream.toString("base64"), "", response, 200);
+                                helperSrc.responseBody({ state: "ok", message: "", data: fileReadStream.toString("base64") }, response, 200);
                             }
                         } else if (mode === "jpg") {
                             const pathPageList = await helperSrc.findPathFileRecursive(pathOutput, "jpg");
@@ -96,9 +96,9 @@ export default class Service {
                                     `${base64List.length}/${pathPageList.length}`
                                 );
 
-                                helperSrc.responseBody("", "ko", response, 500);
+                                helperSrc.responseBody({ state: "ko", message: `${base64List.length}/${pathPageList.length}` }, response, 500);
                             } else {
-                                helperSrc.responseBody(JSON.stringify(base64List), "", response, 200);
+                                helperSrc.responseBody({ state: "ok", message: "", data: JSON.stringify(base64List) }, response, 200);
                             }
                         }
                     }
@@ -125,7 +125,7 @@ export default class Service {
             .catch((error: Error) => {
                 helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - catch()`, error.message);
 
-                helperSrc.responseBody("", "ko", response, 500);
+                helperSrc.responseBody({ state: "ko", message: error.message }, response, 500);
             });
     };
 
