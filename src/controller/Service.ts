@@ -15,8 +15,10 @@ export default class Service {
 
     // Method
     private execute = (mode: string, request: Request, response: Response) => {
+        const uniqueId = helperSrc.generateUniqueId();
+
         this.controllerUpload
-            .execute(request, true, false, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/`)
+            .execute(request, true, false, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/`)
             .then(async (resultControllerUploadList) => {
                 let fileName = "";
 
@@ -32,15 +34,13 @@ export default class Service {
 
                 const fileDetail = await helperSrc.fileDetail(fileName);
 
-                const uniqueId = helperSrc.generateUniqueId();
-
-                const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/${fileDetail.name}`;
+                const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/${fileDetail.baseName}/${fileDetail.name}`;
 
                 if (fileDetail.extension === "xlsx") {
                     await helperSrc.xlsxViewReset(pathInput);
                 }
 
-                const pathInputBasename = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${fileDetail.baseName}/`;
+                const pathInputBasename = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/`;
                 const pathOutput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
                 const pathExecutionCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
