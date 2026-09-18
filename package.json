@@ -25,7 +25,8 @@
         "express-rate-limit": "8.6.2",
         "cookie-parser": "1.4.7",
         "cors": "2.8.6",
-        "fflate": "0.8.3"
+        "fflate": "0.8.3",
+        "http-compression": "1.1.3"
     },
     "devDependencies": {
         "@types/node": "25.3.0",
