@@ -5,7 +5,7 @@ import { Ce } from "@cimo/environment/dist/src/Main.js";
 
 // Custom
 import { Request, Response } from /* webpackIgnore: true */ "express";
-import { strFromU8, strToU8, unzip, zip, Unzipped } from /* webpackIgnore: true */ "fflate";
+import { strFromU8, strToU8, unzip, zip, Unzipped, UnzipFileInfo } from /* webpackIgnore: true */ "fflate";
 // Custom
 
 // Source
@@ -828,7 +828,10 @@ export const xlsxViewReset = (filePath: string): Promise<boolean> => {
                 for (const entryName of Object.keys(entryObject)) {
                     if (entryName.startsWith("xl/worksheets/") && entryName.endsWith(".xml")) {
                         const content = strFromU8(entryObject[entryName]);
-                        const contentNew = content.replace(/(<sheetView[^>]*?)\s+topLeftCell="[^"]*"/g, "$1");
+
+                        let contentNew = content.replace(/(<sheetView[^>]*?)\s+topLeftCell="[^"]*"/g, "$1");
+                        contentNew = contentNew.replace(/<f\b[^>]*\/>/g, "");
+                        contentNew = contentNew.replace(/<f\b[^>]*>[\s\S]*?<\/f>/g, "");
 
                         if (contentNew !== content) {
                             entryObject[entryName] = strToU8(contentNew);
@@ -861,6 +864,108 @@ export const xlsxViewReset = (filePath: string): Promise<boolean> => {
                     });
                 });
             });
+        });
+    });
+};
+
+export const fileCheckOfficeOpenXml = (extension: string, buffer: Uint8Array): Promise<boolean> => {
+    return new Promise((resolve) => {
+        const officeOpenXmlContentTypeObject: Record<string, string> = {
+            xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml",
+            docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml",
+            pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"
+        };
+
+        const contentTypeMain = officeOpenXmlContentTypeObject[extension];
+
+        if (!contentTypeMain) {
+            resolve(true);
+
+            return;
+        }
+
+        const entryNameList: string[] = [];
+
+        const filter = (file: UnzipFileInfo): boolean => {
+            entryNameList.push(file.name.toLowerCase());
+
+            return file.name === "[Content_Types].xml" || file.name === "_rels/.rels";
+        };
+
+        unzip(buffer, { filter }, (errorUnzip: Error | null, entryObject: Unzipped) => {
+            if (errorUnzip) {
+                resolve(false);
+
+                return;
+            }
+
+            if (!entryObject["[Content_Types].xml"] || !entryObject["_rels/.rels"] || entryNameList.includes("mimetype")) {
+                resolve(false);
+
+                return;
+            }
+
+            const relationship = strFromU8(entryObject["_rels/.rels"]);
+            const relationshipTagList = relationship.match(/<Relationship\b[^>]*>/g);
+
+            let partName = "";
+
+            if (relationshipTagList) {
+                for (let a = 0; a < relationshipTagList.length; a++) {
+                    const type = /\bType="([^"]*)"/.exec(relationshipTagList[a]);
+                    const target = /\bTarget="([^"]*)"/.exec(relationshipTagList[a]);
+
+                    if (type && target && type[1].endsWith("/officeDocument")) {
+                        partName = target[1].replace(/^\//, "").toLowerCase();
+
+                        break;
+                    }
+                }
+            }
+
+            if (partName === "" || !entryNameList.includes(partName)) {
+                resolve(false);
+
+                return;
+            }
+
+            const contentType = strFromU8(entryObject["[Content_Types].xml"]);
+            const overrideTagList = contentType.match(/<Override\b[^>]*>/g);
+
+            let contentTypePart = "";
+
+            if (overrideTagList) {
+                for (let a = 0; a < overrideTagList.length; a++) {
+                    const overridePartName = /\bPartName="([^"]*)"/.exec(overrideTagList[a]);
+                    const overrideContentType = /\bContentType="([^"]*)"/.exec(overrideTagList[a]);
+
+                    if (overridePartName && overrideContentType && overridePartName[1].replace(/^\//, "").toLowerCase() === partName) {
+                        contentTypePart = overrideContentType[1];
+
+                        break;
+                    }
+                }
+            }
+
+            if (contentTypePart === "") {
+                const partExtension = partName.slice(partName.lastIndexOf(".") + 1);
+                const defaultTagList = contentType.match(/<Default\b[^>]*>/g);
+
+                if (defaultTagList) {
+                    for (let a = 0; a < defaultTagList.length; a++) {
+                        const defaultExtension = /\bExtension="([^"]*)"/.exec(defaultTagList[a]);
+                        const defaultContentType = /\bContentType="([^"]*)"/.exec(defaultTagList[a]);
+
+                        if (defaultExtension && defaultContentType && defaultExtension[1].toLowerCase() === partExtension) {
+                            contentTypePart = defaultContentType[1];
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            resolve(contentTypePart === contentTypeMain);
         });
     });
 };

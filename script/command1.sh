@@ -23,15 +23,25 @@ extension="${parameter2##*.}"
 basename=$(basename "${parameter2%.*}")
 
 filterPdf="pdf"
+filterInput=""
 
-if [ "${extension}" = "xlsx" ]
+if [ "${extension}" = "docx" ]
+then
+    filterInput="MS Word 2007 XML"
+elif [ "${extension}" = "xlsx" ]
 then
     filterPdf='pdf:calc_pdf_Export:{"SinglePageSheets":{"type":"boolean","value":"true"}}'
+    filterInput="Calc MS Excel 2007 XML"
+elif [ "${extension}" = "pptx" ]
+then
+    filterInput="Impress MS PowerPoint 2007 XML"
 fi
 
 if [ "${parameter1}" = "pdf" ]
 then
-    "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+    "/home/squashfs-root/AppRun" --norestore --nologo --headless ${filterInput:+"--infilter=${filterInput}"} --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+
+    qpdf --empty --pages "${pathOutput}${basename}.pdf" 1-z -- "${pathOutput}${basename}.clean.pdf" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log" && mv -f "${pathOutput}${basename}.clean.pdf" "${pathOutput}${basename}.pdf" || rm -f "${pathOutput}${basename}.pdf"
 elif [ "${parameter1}" = "jpg" ]
 then
     if [ "${extension}" = "pdf" ]
@@ -42,7 +52,7 @@ then
 
         echo "Copy pdf" | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
     else
-        "/home/squashfs-root/AppRun" --norestore --nologo --headless --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
+        "/home/squashfs-root/AppRun" --norestore --nologo --headless ${filterInput:+"--infilter=${filterInput}"} --convert-to "${filterPdf}" "${parameter2}" --outdir "${pathOutput}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"
     fi
 
     pdftoppm -jpeg -r 150 "${pathOutput}${basename}.pdf" "${pathOutput}${basename}" 2>&1 | tee -a "${PATH_ROOT}${MS_FC_PATH_LOG}debug.log"

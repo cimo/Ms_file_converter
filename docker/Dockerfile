@@ -39,6 +39,7 @@ ENV PULSE_SERVER="unix:/mnt/wslg/PulseServer"
 COPY ./certificate/ /usr/local/share/ca-certificates/
 COPY ./docker/font/ /usr/share/fonts/truetype/noto/
 COPY ./docker/font.conf /etc/fonts/local.conf
+COPY ./docker/libreoffice_security.xcd /home/libreoffice_security.xcd
 COPY ./ ${PATH_ROOT}
 
 RUN cd ~ \
@@ -129,15 +130,17 @@ RUN cd ~ \
     && apt-get update && apt-get install -y \
     libssl3 \
     libcups2 \
-    && curl -fsSL https://appimages.libreitalia.org/LibreOffice-still.basic-x86_64.AppImage -o /home/libreoffice.AppImage \
+    && curl -fsSL "https://appimages.libreitalia.org/LibreOffice-26.8.0.3.basic-x86_64.AppImage" -o /home/libreoffice.AppImage \
     && cd /home/ \
     && chmod +x /home/libreoffice.AppImage \
     && /home/libreoffice.AppImage --appimage-extract \
+    && mv /home/libreoffice_security.xcd /home/squashfs-root/opt/libreoffice*/share/registry/ \
     && chown -R node:node /home/squashfs-root/ \
     && cd ~ \
     # Pdf
     && apt-get update && apt-get install -y \
     poppler-utils \
+    qpdf \
     # Upgrade
     && apt-get update \
     && apt-get upgrade -y \

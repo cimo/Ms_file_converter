@@ -21,12 +21,14 @@ export default class Service {
             .execute(request, true, false, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/`)
             .then(async (resultControllerUploadList) => {
                 let fileName = "";
+                let fileBuffer: Uint8Array = Buffer.alloc(0);
 
                 for (let a = 0; a < resultControllerUploadList.length; a++) {
                     const resultControllerUpload = resultControllerUploadList[a];
 
                     if (resultControllerUpload.name === "file" && resultControllerUpload.fileName) {
                         fileName = resultControllerUpload.fileName;
+                        fileBuffer = resultControllerUpload.buffer;
 
                         break;
                     }
@@ -34,14 +36,30 @@ export default class Service {
 
                 const fileDetail = await helperSrc.fileDetail(fileName);
 
-                const pathInput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/${fileDetail.baseName}/${fileDetail.name}`;
+                const pathInputBasename = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/`;
+                const pathInput = `${pathInputBasename}${fileDetail.baseName}/${fileDetail.name}`;
+                const pathOutput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
+
+                const isOfficeOpenXml = await helperSrc.fileCheckOfficeOpenXml(fileDetail.extension, fileBuffer);
+
+                if (!isOfficeOpenXml) {
+                    const fileOrFolderDeleteInput = await helperSrc.fileOrFolderDelete(pathInputBasename);
+
+                    if (typeof fileOrFolderDeleteInput !== "boolean") {
+                        helperSrc.writeLog(
+                            `Service.ts - api() - post(/api/${mode}) - execute() - fileOrFolderDelete()`,
+                            fileOrFolderDeleteInput.toString()
+                        );
+                    }
+
+                    helperSrc.responseBody({ state: "ko", message: "File content does not match the extension." }, response, 500);
+
+                    return;
+                }
 
                 if (fileDetail.extension === "xlsx") {
                     await helperSrc.xlsxViewReset(pathInput);
                 }
-
-                const pathInputBasename = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/`;
-                const pathOutput = `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}output/${uniqueId}/`;
 
                 const pathExecutionCommand = `${helperSrc.PATH_ROOT}${helperSrc.PATH_SCRIPT}command1.sh`;
                 const executionArgumentList = [
@@ -56,11 +74,11 @@ export default class Service {
                     if (result.error) {
                         helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
 
-                        helperSrc.responseBody({ state: "ko", message: result.error.message }, response, 500);
+                        helperSrc.responseBody({ state: "ko", message: "Conversion failed." }, response, 500);
                     } else if (result.stdout === "" && result.stderr !== "") {
                         helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - stderr`, result.stderr);
 
-                        helperSrc.responseBody({ state: "ko", message: result.stderr }, response, 500);
+                        helperSrc.responseBody({ state: "ko", message: "Conversion failed." }, response, 500);
                     } else if ((result.stdout !== "" && result.stderr === "") || (result.stdout !== "" && result.stderr !== "")) {
                         if (mode === "pdf") {
                             const fileReadStream = await helperSrc.fileReadStream(`${pathOutput}${Path.parse(fileName).name}.${mode}`);
@@ -71,7 +89,7 @@ export default class Service {
                                     fileReadStream.toString()
                                 );
 
-                                helperSrc.responseBody({ state: "ko", message: fileReadStream.toString() }, response, 500);
+                                helperSrc.responseBody({ state: "ko", message: "Conversion failed." }, response, 500);
                             } else {
                                 helperSrc.responseBody({ state: "ok", message: "", data: fileReadStream.toString("base64") }, response, 200);
                             }
