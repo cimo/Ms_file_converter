@@ -1,9 +1,9 @@
 #!/bin/bash
 
-p1=$(printf '%s' "${1}" | xargs)
-p2=$(printf '%s' "${2}" | xargs)
-p3=$(printf '%s' "${3}" | xargs)
-p4=$(printf '%s' "${4}" | xargs)
+p1="${1}"
+p2="${2}"
+p3="${3}"
+p4="${4}"
 
 if [ "$#" -lt 4 ] || [ -z "${p1}" ] || [ -z "${p2}" ] || [ -z "${p3}" ] || [ -z "${p4}" ]
 then

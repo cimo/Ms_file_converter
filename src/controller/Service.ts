@@ -19,16 +19,22 @@ export default class Service {
 
         this.controllerUpload
             .execute(request, true, false, `${helperSrc.PATH_ROOT}${helperSrc.PATH_FILE}input/${uniqueId}/`)
-            .then(async (resultControllerUploadList) => {
+            .then(async (resultControllerUpload) => {
+                if (resultControllerUpload.message !== "") {
+                    helperSrc.responseBody({ state: "ko", message: resultControllerUpload.message }, response, 200);
+
+                    return;
+                }
+
                 let fileName = "";
                 let fileBuffer: Uint8Array = Buffer.alloc(0);
 
-                for (let a = 0; a < resultControllerUploadList.length; a++) {
-                    const resultControllerUpload = resultControllerUploadList[a];
+                for (let a = 0; a < resultControllerUpload.formDataList.length; a++) {
+                    const formData = resultControllerUpload.formDataList[a];
 
-                    if (resultControllerUpload.name === "file" && resultControllerUpload.fileName) {
-                        fileName = resultControllerUpload.fileName;
-                        fileBuffer = resultControllerUpload.buffer;
+                    if (formData.name === "file" && formData.fileName) {
+                        fileName = formData.fileName;
+                        fileBuffer = formData.buffer;
 
                         break;
                     }
@@ -52,7 +58,7 @@ export default class Service {
                         );
                     }
 
-                    helperSrc.responseBody({ state: "ko", message: "File content does not match the extension." }, response, 500);
+                    helperSrc.responseBody({ state: "ko", message: "File content does not match the extension." }, response, 200);
 
                     return;
                 }
