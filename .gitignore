@@ -27,8 +27,9 @@ pnpm-debug.log*
 !.config/.gitkeep
 !.config/libreoffice
 !.config/libreoffice/**
-.config/libreoffice/4/crash
+.config/libreoffice/**/crash
 .config/libreoffice/**/lu*.tmp
+.config/libreoffice/**/.lock
 .local
 .npm
 .npmrc

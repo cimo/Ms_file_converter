@@ -76,9 +76,34 @@ export default class Service {
                     uniqueId
                 ];
 
-                helperSrc.executionFile(executionArgumentList).then(async (result) => {
+                const execution = helperSrc.executionFile(executionArgumentList);
+
+                let isExecutionKill = false;
+
+                const executionKill = (): void => {
+                    if (
+                        !response.writableFinished &&
+                        execution.process.pid &&
+                        execution.process.exitCode === null &&
+                        execution.process.signalCode === null
+                    ) {
+                        isExecutionKill = true;
+
+                        process.kill(-execution.process.pid, "SIGKILL");
+                    }
+                };
+
+                if (response.closed) {
+                    executionKill();
+                } else {
+                    response.on("close", executionKill);
+                }
+
+                execution.then(async (result) => {
                     if (result.error) {
-                        helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
+                        if (!isExecutionKill) {
+                            helperSrc.writeLog(`Service.ts - api() - post(/api/${mode}) - execute() - executionFile() - error`, result.error.message);
+                        }
 
                         helperSrc.responseBody({ state: "ko", message: "Conversion failed." }, response, 500);
                     } else if (result.stdout === "" && result.stderr !== "") {
